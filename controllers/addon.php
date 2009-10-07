@@ -222,6 +222,7 @@ class AddonController extends AddonsController {
                PATH_ROOT . DS . 'uploads' . DS . $FileBaseName
             );
             $this->Form->SetFormValue('File', $FileBaseName);
+				$this->Form->SetFormValue('TestedWith', 'Blank');
 
          } catch (Exception $ex) {
             $this->Form->AddError($ex->getMessage());

@@ -140,8 +140,7 @@ class Gdn_AddonModel extends Gdn_Model {
          
          if ($AddonID > 0) {
             $Addon = $this->GetID($AddonID);
-            var_dump($Addon);
-/*
+
             // Record Activity
             AddActivity(
                $Session->UserID,
@@ -150,7 +149,6 @@ class Gdn_AddonModel extends Gdn_Model {
                '',
                '/addon/'.$AddonID.'/'.Format::Url($Addon->Name)
             );
-*/
          }
       }
       if (!is_numeric($AddonID))
