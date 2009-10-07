@@ -91,10 +91,10 @@ class Gdn_AddonModel extends Gdn_Model {
 
       if (array_key_exists('Version', $FormPostValues))
          $this->Validation->ApplyRule('Version', 'Required');
-
+/*
       if (array_key_exists('TestedWith', $FormPostValues))
          $this->Validation->ApplyRule('TestedWith', 'Required');
-      
+*/      
       // Get the ID from the form so we know if we are inserting or updating.
       $AddonID = ArrayValue('AddonID', $FormPostValues, '');
       $Insert = $AddonID == '' ? TRUE : FALSE;
@@ -131,22 +131,27 @@ class Gdn_AddonModel extends Gdn_Model {
                'AddonID' => $AddonID,
                'File' => $FileName,
                'Version' => ArrayValue('Version', $FormPostValues, ''),
-               'TestedWith' => ArrayValue('TestedWith', $FormPostValues, ''),
+               'TestedWith' => ArrayValue('TestedWith', $FormPostValues, 'Empty'),
                'DateInserted' => Format::ToDateTime()
             ));
             // Mark the new addon file & version as the current version
             $this->SQL->Put($this->Name, array('CurrentAddonVersionID' => $AddonVersionID), array($this->PrimaryKey => $AddonID));
          }
          
-         $Addon = $this->GetID($AddonID);
-         // Record Activity
-         AddActivity(
-            $Session->UserID,
-            $Activity,
-            '',
-            '',
-            '/addon/'.$AddonID.'/'.Format::Url($Addon->Name)
-         );
+         if ($AddonID > 0) {
+            $Addon = $this->GetID($AddonID);
+            var_dump($Addon);
+/*
+            // Record Activity
+            AddActivity(
+               $Session->UserID,
+               $Activity,
+               '',
+               '',
+               '/addon/'.$AddonID.'/'.Format::Url($Addon->Name)
+            );
+*/
+         }
       }
       if (!is_numeric($AddonID))
          $AddonID = FALSE;
