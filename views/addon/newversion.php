@@ -13,7 +13,7 @@ if ($this->DeliveryType() == DELIVERY_TYPE_ALL)
       <h2><?php echo Gdn::Translate('Upload a New Version'); ?></h2>
       <ul>
          <li>
-            <div class="Info"><?php echo Gdn::Translate('By uploading a file you certify that you have the right to distribute this picture and that it does not violate the Terms of Service.'); ?></div>
+            <div class="Info"><?php echo Gdn::Translate('By uploading a file you certify that you have the right to distribute this addon and that it does not violate the Terms of Service.'); ?></div>
             <?php echo $this->Form->Label('File to Upload (2mb max)', 'File'); ?>
             <?php echo $this->Form->Input('File', 'file', array('class' => 'File')); ?>
          </li>

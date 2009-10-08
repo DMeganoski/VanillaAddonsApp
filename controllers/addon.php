@@ -256,7 +256,17 @@ class AddonController extends AddonsController {
   }
 
    public function Delete($AddonID = '') {
-      $this->Permission('Addons.Addon.Manage');
+      $Session = Gdn::Session();
+      if (!$Session->IsValid())
+         $this->Form->AddError('You must be authenticated in order to use this form.');
+
+      $Addon = $this->AddonModel->GetID($AddonID);
+      if (!$Addon)
+         Redirect('garden/home/filenotfound');
+
+      if ($Session->UserID != $Addon->InsertUserID)
+			$this->Permission('Addons.Addon.Manage');
+
       $Session = Gdn::Session();
       if (is_numeric($AddonID)) 
          $this->AddonModel->Delete($AddonID);
