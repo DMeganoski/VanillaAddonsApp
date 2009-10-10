@@ -19,7 +19,7 @@ class GetController extends AddonsController {
       if ($this->Head) {
          $this->Head->AddScript('js/library/jquery.js');
 			if ($ServeFile != '1')
-				$this->Head->AddScript('applications/vanillaforumsorg/js/get.js');
+				$this->Head->AddScript('applications/vforg/js/get.js');
       }
 
 		// Define the item being downloaded
