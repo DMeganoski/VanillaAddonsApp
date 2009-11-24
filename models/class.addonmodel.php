@@ -107,7 +107,7 @@ class Gdn_AddonModel extends Gdn_Model {
          $this->AddInsertFields($FormPostValues);
       } else if (!array_key_exists('Vanilla2', $FormPostValues)) {
          $Tmp = $this->GetID($AddonID);
-         $FormPostValues['Vanilla2'] = $Tmp->Vanilla2;
+         $FormPostValues['Vanilla2'] = $Tmp->Vanilla2 ? '1' : '0';
       }
       $this->AddUpdateFields($FormPostValues);
       // Validate the form posted values

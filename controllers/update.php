@@ -16,7 +16,7 @@ class UpdateController extends AddonsController {
       $CountConversationMessages = GetIncomingValue('messages', '');
       $CountDiscussions = GetIncomingValue('discussions', '');
       $CountComments = GetIncomingValue('comments', '');
-      $UpdateChecks = Format::Unserialize(GetIncomingValue('updateChecks', ''));
+      $UpdateChecks = Format::Unserialize($this->_GetJsonString('updateChecks'));
       $UpdateCheckID = 0;
       
       // Get the UpdateCheckSourceID
@@ -56,10 +56,9 @@ class UpdateController extends AddonsController {
       // Define a RequiredUpdates array as a response
       $Response = array();
 
-      // If the updatecheck instance was saved successfully && the updatechecks
-      // argument was a serialize array, parse it to see if we have newer
-      // versions
-      if ($UpdateCheckID > 0 && is_array($UpdateChecks)) {
+      // If the the updatechecks argument was a serialized array, parse it to
+      // see if we have newer versions
+      if (is_array($UpdateChecks)) {
          foreach ($UpdateChecks as $Addon) {
             if (is_array($Addon)) {
                $Name = ArrayValue('Name', $Addon, '');
@@ -76,7 +75,6 @@ class UpdateController extends AddonsController {
                $Data = $SQL
                   ->Select('a.AddonID, v.Version')
                   ->From('Addon a')
-                  ->Join('AddonType t', 'a.AddonTypeID = t.AddonTypeID')
                   ->Join('AddonVersion v', 'a.CurrentAddonVersionID = v.AddonVersionID')
                   ->Where('a.Name', $Name)
                   ->Get()
@@ -98,30 +96,37 @@ class UpdateController extends AddonsController {
                }
             }
                
-            // Insert the addon into the UpdateAddon table
-            $UpdateAddonID = $SQL->Insert('UpdateAddon', array(
-               'AddonID' => $OurAddonID,
-               'Name' => $Name,
-               'Type' => $Type,
-               'Version' => $Version
-            ));
-            
-            // Insert the relation of this addon to this updatecheck
-            if ($UpdateAddonID > 0) {
-               $SQL->Insert('UpdateCheckAddon', array(
-                  'UpdateCheckID' => $UpdateCheckID,
-                  'UpdateAddonID' => $UpdateAddonID
+            if ($UpdateCheckID > 0) {
+               // Insert the addon into the UpdateAddon table
+               $UpdateAddonID = $SQL->Insert('UpdateAddon', array(
+                  'AddonID' => $OurAddonID,
+                  'Name' => $Name,
+                  'Type' => $Type,
+                  'Version' => $Version
                ));
+               
+               // Insert the relation of this addon to this updatecheck
+               if ($UpdateAddonID > 0) {
+                  $SQL->Insert('UpdateCheckAddon', array(
+                     'UpdateCheckID' => $UpdateCheckID,
+                     'UpdateAddonID' => $UpdateAddonID
+                  ));
+               }
             }
          }
       }
-      
-      // Send messages back to the requesting application
-      /*
-      
+
       // Make sure the database connection is closed before exiting.
       $Database = Gdn::Database();
       $Database->CloseConnection();
+
+      // Send messages back to the requesting application
+      exit(json_encode(array(
+         'messages' => '', // <-- These messages must be an array of GDN_Message table rows in associative array format.
+         'response' => Format::Serialize($Response)
+      )));
+      /*
+       You can also send back messages to be injected into the remote application's pages. They should be in the following format:
       exit(json_encode(array(
          'messages' => Format::Serialize(array(
             array(
@@ -145,8 +150,6 @@ class UpdateController extends AddonsController {
          )), // <-- These messages must be an array of GDN_Message table rows in associative array format.
          'response' => Format::Serialize($Response)
       )));
-      */
-      /*
        The Messages will be inserted into the remote databases GDN_Message table like this:
          'Content' => ArrayValue('Content', $Message, ''),
          'AllowDismiss' => ArrayValue('AllowDismiss', $Message, '1'),
@@ -159,5 +162,32 @@ class UpdateController extends AddonsController {
    
    public function Find($PluginName = '') {
       // Find the requested plugin and redirect to it...
+      $Data = $this->Database->SQL()
+         ->Select('AddonID, Name')
+         ->From('Addon')
+         ->Where('Name', $PluginName)
+         ->Get()
+         ->FirstRow();
+      if ($Data) {
+         Redirect('/addon/'.$Data->AddonID.'/'.Format::Url($Data->Name));
+      } else {
+         Redirect('/addon/notfound/');
+      }
+   }
+   
+   private function _GetJsonString($FieldName, $Default = '') {
+      $Value = ArrayValue($FieldName, $_POST, '');
+      $Value = $Value == '' ? ArrayValue($FieldName, $_GET, '') : $Value;
+      if (get_magic_quotes_gpc()) {
+         if (is_array($Value)) {
+            $Count = count($Value);
+            for ($i = 0; $i < $Count; ++$i) {
+               $Value[$i] = stripslashes($Value[$i]);
+            }
+         } else {
+            $Value = stripslashes($Value);
+         }
+      }
+      return $Value;     
    }
 }

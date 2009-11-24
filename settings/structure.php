@@ -21,9 +21,9 @@ $SQL = $Database->SQL();
 $Construct = $Database->Structure();
 
 $Construct->Table('AddonType')
-   ->Column('AddonTypeID', 'int', 4, FALSE, NULL, 'primary', TRUE)
-   ->Column('Label', 'varchar', 30)
-   ->Column('Visible', array('1','0'), '', FALSE, '1')
+   ->PrimaryKey('AddonTypeID')
+   ->Column('Label', 'varchar(50)')
+   ->Column('Visible', array('1','0'), '1')
    ->Set($Explicit, $Drop);
 
 if ($SQL->Select()->From('AddonType')->Get()->NumRows() == 0) {
@@ -35,123 +35,120 @@ if ($SQL->Select()->From('AddonType')->Get()->NumRows() == 0) {
 }
 
 $Construct->Table('Addon')
-   ->Column('AddonID', 'int', 11, FALSE, NULL, 'primary', TRUE)
-   ->Column('CurrentAddonVersionID', 'int', 4, TRUE, NULL, 'key')
-   ->Column('AddonTypeID', 'int', 4, FALSE, NULL, 'key')
-   ->Column('InsertUserID', 'int', 10, FALSE, NULL, 'key')
-   ->Column('UpdateUserID', 'int', 10, TRUE, NULL)
-   ->Column('Name', 'varchar', 100)
-   ->Column('Icon', 'varchar', 200, TRUE)
-   ->Column('Description', 'text', '', TRUE)
-   ->Column('Requirements', 'text', '', TRUE)
-   ->Column('CountComments', 'int', 4, FALSE, '0')
-   ->Column('CountDownloads', 'int', 4, FALSE, '0')
-   ->Column('Visible', array('1', '0'), '', FALSE, '1')
-   ->Column('Vanilla2', array('1', '0'), '', FALSE, '1')
+   ->PrimaryKey('AddonID')
+   ->Column('CurrentAddonVersionID', 'int', TRUE, 'key')
+   ->Column('AddonTypeID', 'int', FALSE, 'key')
+   ->Column('InsertUserID', 'int', FALSE, 'key')
+   ->Column('UpdateUserID', 'int', TRUE)
+   ->Column('Name', 'varchar(100)')
+   ->Column('Icon', 'varchar(200)', TRUE)
+   ->Column('Description', 'text', TRUE)
+   ->Column('Requirements', 'text', TRUE)
+   ->Column('CountComments', 'int', '0')
+   ->Column('CountDownloads', 'int', '0')
+   ->Column('Visible', array('1', '0'), '1')
+   ->Column('Vanilla2', array('1', '0'), '1')
    ->Column('DateInserted', 'datetime')
-   ->Column('DateUpdated', 'datetime', '', TRUE)
+   ->Column('DateUpdated', 'datetime', TRUE)
    ->Set($Explicit, $Drop);
 
 $Construct->Table('AddonComment')
-   ->Column('AddonCommentID', 'int', 11, FALSE, NULL, 'primary', TRUE)
-   ->Column('AddonID', 'int', 11, FALSE, NULL, 'key')
-   ->Column('InsertUserID', 'int', 10, TRUE, NULL, 'key')
+   ->PrimaryKey('AddonCommentID')
+   ->Column('AddonID', 'int', FALSE, 'key')
+   ->Column('InsertUserID', 'int', FALSE, 'key')
    ->Column('Body', 'text')
-   ->Column('Format', 'varchar', 20, TRUE)
+   ->Column('Format', 'varchar(20)', TRUE)
    ->Column('DateInserted', 'datetime')
    ->Set($Explicit, $Drop);
 
 $Construct->Table('AddonVersion')
-   ->Column('AddonVersionID', 'int', 11, FALSE, NULL, 'primary', TRUE)
-   ->Column('AddonID', 'int', 11, FALSE, NULL, 'key')
-   ->Column('File', 'varchar', 200, TRUE)
-   ->Column('Version', 'varchar', 20, FALSE)
+   ->PrimaryKey('AddonVersionID')
+   ->Column('AddonID', 'int', FALSE, 'key')
+   ->Column('File', 'varchar(200)', TRUE)
+   ->Column('Version', 'varchar(20)')
    ->Column('TestedWith', 'text')
-   ->Column('InsertUserID', 'int', 10, TRUE, NULL, 'key')
+   ->Column('InsertUserID', 'int', FALSE, 'key')
    ->Column('DateInserted', 'datetime')
-   ->Column('DateReviewed', 'datetime', '', TRUE)
+   ->Column('DateReviewed', 'datetime', TRUE)
    ->Set($Explicit, $Drop);
 
 $Construct->Table('AddonPicture')
-   ->Column('AddonPictureID', 'int', 11, FALSE, NULL, 'primary', TRUE)
-   ->Column('AddonID', 'int', 11, FALSE, NULL, 'key')
-   ->Column('File', 'varchar', 200, TRUE)
+   ->PrimaryKey('AddonPictureID')
+   ->Column('AddonID', 'int', FALSE, 'key')
+   ->Column('File', 'varchar(200)')
    ->Column('DateInserted', 'datetime')
    ->Set($Explicit, $Drop);
 
 $Construct->Table('Download')
-   ->Column('DownloadID', 'int', 11, FALSE, NULL, 'primary', TRUE)
-   ->Column('AddonID', 'int', 11, TRUE, NULL, 'key')
-   ->Column('DateInserted', 'datetime', '', TRUE)
-   ->Column('RemoteIp', 'varchar', '50', TRUE)
+   ->PrimaryKey('DownloadID')
+   ->Column('AddonID', 'int', FALSE, 'key')
+   ->Column('DateInserted', 'datetime')
+   ->Column('RemoteIp', 'varchar(50)', TRUE)
    ->Set($Explicit, $Drop);
 
 $Construct->Table('UpdateCheckSource')
-   ->Column('SourceID', 'int', 11, FALSE, NULL, 'primary', TRUE)
-   ->Column('Location', 'varchar', 255, TRUE)
-   ->Column('DateInserted', 'datetime', '', TRUE)
-   ->Column('RemoteIp', 'varchar', '50', TRUE)
+   ->PrimaryKey('SourceID')
+   ->Column('Location', 'varchar(255)', TRUE)
+   ->Column('DateInserted', 'datetime', TRUE)
+   ->Column('RemoteIp', 'varchar(50)', TRUE)
    ->Set($Explicit, $Drop);
 
 $Construct->Table('UpdateCheck')
-   ->Column('UpdateCheckID', 'int', 11, FALSE, NULL, 'primary', TRUE)
-   ->Column('SourceID', 'int', 11, TRUE, NULL, 'key')
-   ->Column('CountUsers', 'int', 4, FALSE, '0')
-   ->Column('CountDiscussions', 'int', 4, FALSE, '0')
-   ->Column('CountComments', 'int', 4, FALSE, '0')
-   ->Column('CountConversations', 'int', 4, FALSE, '0')
-   ->Column('CountConversationMessages', 'int', 4, FALSE, '0')
-   ->Column('DateInserted', 'datetime', '', TRUE)
-   ->Column('RemoteIp', 'varchar', '50', TRUE)
+   ->PrimaryKey('UpdateCheckID')
+   ->Column('SourceID', 'int', FALSE, 'key')
+   ->Column('CountUsers', 'int', '0')
+   ->Column('CountDiscussions', 'int', '0')
+   ->Column('CountComments', 'int', '0')
+   ->Column('CountConversations', 'int', '0')
+   ->Column('CountConversationMessages', 'int', '0')
+   ->Column('DateInserted', 'datetime')
+   ->Column('RemoteIp', 'varchar(50)', TRUE)
    ->Set($Explicit, $Drop);
 
 // Need to use this table instead of linking directly with the Addon table
 // because we might not have all of the addons being checked for.
 $Construct->Table('UpdateAddon')
-   ->Column('UpdateAddonID', 'int', 11, FALSE, NULL, 'primary', TRUE)
-   ->Column('AddonID', 'int', 11, TRUE, NULL, 'key')
-   ->Column('Name', 'varchar', 255, TRUE)
-   ->Column('Type', 'varchar', 255, TRUE)
-   ->Column('Version', 'varchar', 255, TRUE)
+   ->PrimaryKey('UpdateAddonID')
+   ->Column('AddonID', 'int', FALSE, 'key')
+   ->Column('Name', 'varchar(255)', TRUE)
+   ->Column('Type', 'varchar(255)', TRUE)
+   ->Column('Version', 'varchar(255)', TRUE)
    ->Set($Explicit, $Drop);
    
 $Construct->Table('UpdateCheckAddon')
-   ->Column('UpdateCheckID', 'int', 11, TRUE, NULL, 'key')
-   ->Column('UpdateAddonID', 'int', 11, TRUE, NULL, 'key')
+   ->Column('UpdateCheckID', 'int', FALSE, 'key')
+   ->Column('UpdateAddonID', 'int', FALSE, 'key')
    ->Set($Explicit, $Drop);
    
-// if ($Drop) {
-   $PermissionModel = Gdn::PermissionModel();
-   $PermissionModel->Database = $Database;
-   $PermissionModel->SQL = $SQL;
+$PermissionModel = Gdn::PermissionModel();
+$PermissionModel->Database = $Database;
+$PermissionModel->SQL = $SQL;
+
+// Define some global addon permissions.
+$PermissionModel->Define(array(
+   'Addons.Addon.Add',
+   'Addons.Addon.Manage',
+   'Addons.Comments.Manage'
+   ));
+
+// Set the intial member permissions.
+$PermissionModel->Save(array(
+   'RoleID' => 8,
+   'Addons.Addon.Add' => 1,
+   'Addons.Addon.Manage' => 1,
+   'Addons.Comments.Manage' => 1
+   ));
    
-   // Define some global addon permissions.
-   $PermissionModel->Define(array(
-      'Addons.Addon.Add',
-      'Addons.Addon.Manage',
-      'Addons.Comments.Manage'
-      ));
-   
-   // Set the intial member permissions.
-   $PermissionModel->Save(array(
-      'RoleID' => 8,
-      'Addons.Addon.Add' => 1,
-      'Addons.Addon.Manage' => 1,
-      'Addons.Comments.Manage' => 1
-      ));
-      
-   // Set the initial administrator permissions.
-   $PermissionModel->Save(array(
-      'RoleID' => 16,
-      'Addons.Addon.Add' => 1,
-      'Addons.Addon.Manage' => 1,
-      'Addons.Comments.Manage' => 1
-      ));
-   
-   // Make sure that User.Permissions is blank so new permissions for users get applied.
-   $SQL->Update('User', array('Permissions' => ''))->Put();
-// }
-   
+// Set the initial administrator permissions.
+$PermissionModel->Save(array(
+   'RoleID' => 16,
+   'Addons.Addon.Add' => 1,
+   'Addons.Addon.Manage' => 1,
+   'Addons.Comments.Manage' => 1
+   ));
+
+// Make sure that User.Permissions is blank so new permissions for users get applied.
+$SQL->Update('User', array('Permissions' => ''))->Put();
 
 // Insert some activity types
 ///  %1 = ActivityName
@@ -178,3 +175,66 @@ if ($SQL->GetWhere('ActivityType', array('Name' => 'AddonComment'))->NumRows() =
 // People mentioning others in addon comments
 if ($SQL->GetWhere('ActivityType', array('Name' => 'AddonCommentMention'))->NumRows() == 0)
    $SQL->Insert('ActivityType', array('AllowComments' => '0', 'Name' => 'AddonCommentMention', 'FullHeadline' => '%1$s mentioned %3$s in a %8$s.', 'ProfileHeadline' => '%1$s mentioned %3$s in a %8$s.', 'RouteCode' => 'comment', 'Notify' => '1', 'Public' => '0'));
+
+// People adding new language definitions
+if ($SQL->GetWhere('ActivityType', array('Name' => 'AddUserLanguage'))->NumRows() == 0)
+   $SQL->Insert('ActivityType', array('AllowComments' => '0', 'Name' => 'AddUserLanguage', 'FullHeadline' => '%1$s added a new %8$s.', 'ProfileHeadline' => '%1$s added a new %8$s.', 'RouteCode' => 'language', 'Notify' => '0', 'Public' => '1'));
+
+// People editing language definitions
+if ($SQL->GetWhere('ActivityType', array('Name' => 'EditUserLanguage'))->NumRows() == 0)
+   $SQL->Insert('ActivityType', array('AllowComments' => '0', 'Name' => 'EditUserLanguage', 'FullHeadline' => '%1$s edited a %8$s.', 'ProfileHeadline' => '%1$s edited a %8$s.', 'RouteCode' => 'language', 'Notify' => '0', 'Public' => '1'));
+
+// Contains list of available languages for translating
+$Construct->Table('Language')
+   ->PrimaryKey('LanguageID')
+   ->Column('Name', 'varchar(255)')
+   ->Column('Code', 'varchar(10)')
+   ->Column('InsertUserID', 'int', FALSE, 'key')
+   ->Column('DateInserted', 'datetime')
+   ->Column('UpdateUserID', 'int', TRUE)
+   ->Column('DateUpdated', 'datetime', TRUE)
+   ->Set($Explicit, $Drop);
+   
+// Contains relationships of who owns translations and who can edit translations (owner decides who can edit)
+$Construct->Table('UserLanguage')
+   ->PrimaryKey('UserLanguageID')
+   ->Column('UserID', 'int', FALSE, 'key')
+   ->Column('LanguageID', 'int', FALSE, 'key')
+   ->Column('Owner', array('1', '0'), '0')
+   ->Column('CountTranslations', 'int', '0') // The number of translations this UserLanguage contains
+   ->Column('CountDownloads', 'int', '0')
+   ->Column('CountLikes', 'int', '0')
+   ->Set($Explicit, $Drop);
+
+// Contains individual translations as well as source codes
+$Construct->Table('Translation')
+   ->PrimaryKey('TranslationID')
+   ->Column('UserLanguageID', 'int', FALSE, 'key')
+   ->Column('SourceTranslationID', 'int', TRUE, 'key') // This is the related TranslationID where LanguageID = 1 (the source codes for translations)
+   ->Column('Application', 'varchar(100)', TRUE)
+   ->Column('Value', 'text')
+   ->Column('InsertUserID', 'int', FALSE, 'key')
+   ->Column('DateInserted', 'datetime')
+   ->Column('UpdateUserID', 'int', TRUE)
+   ->Column('DateUpdated', 'datetime', TRUE)
+   ->Set($Explicit, $Drop);
+
+// Contains records of when actions were performed on userlanguages (ie. it is
+// downloaded or "liked"). These values are aggregated in
+// UserLanguage.CountLikes and UserLanguage.CountDownloads for faster querying,
+// but saved here for reporting.
+$Construct->Table('UserLanguageAction')
+   ->PrimaryKey('UserLanguageActionID')
+   ->Column('UserLanguageID', 'int', FALSE, 'key')
+   ->Column('Action', 'varchar(20)') // The action being performed (ie. "download" or "like")
+   ->Column('InsertUserID', 'int', TRUE, 'key') // Allows nulls because you do not need to be authenticated to download a userlanguage
+   ->Column('DateInserted', 'datetime')
+   ->Set($Explicit, $Drop);
+
+// Make sure the default "source" translation exists
+if ($SQL->GetWhere('Language', array('LanguageID' => 1))->NumRows() == 0)
+   $SQL->Insert('Language', array('Name' => 'Source Codes', 'Code' => 'SOURCE', 'InsertUserID' => 1, 'DateInserted' => '2009-10-19 12:00:00'));
+
+// Mark (UserID 1) owns the source translation
+if ($SQL->GetWhere('UserLanguage', array('LanguageID' => 1, 'UserID' => 1))->NumRows() == 0)
+   $SQL->Insert('UserLanguage', array('LanguageID' => 1, 'UserID' => 1, 'Owner' => '1'));

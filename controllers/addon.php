@@ -21,12 +21,12 @@ class AddonController extends AddonsController {
    public function Initialize() {
       parent::Initialize();
       if ($this->Head) {
-         $this->Head->AddScript('js/library/jquery.js');
-         $this->Head->AddScript('js/library/jquery.livequery.js');
-         $this->Head->AddScript('js/library/jquery.form.js');
-         $this->Head->AddScript('js/library/jquery.popup.js');
-         $this->Head->AddScript('js/library/jquery.gardenhandleajaxform.js');
-         $this->Head->AddScript('js/global.js');
+         $this->AddJsFile('jquery.js');
+         $this->AddJsFile('jquery.livequery.js');
+         $this->AddJsFile('jquery.form.js');
+         $this->AddJsFile('jquery.popup.js');
+         $this->AddJsFile('jquery.gardenhandleajaxform.js');
+         $this->AddJsFile('global.js');
       }
    }
    
@@ -54,9 +54,9 @@ class AddonController extends AddonsController {
             $this->AddCssFile('popup.css');
             // $this->AddCssFile('prettyPhoto.css');
             $this->AddCssFile('fancyzoom.css');
-            $this->Head->AddScript('/applications/addons/js/fancyzoom.js');
-   			$this->Head->AddScript('/js/library/jquery.gardenmorepager.js');
-            $this->Head->AddScript('/applications/addons/js/addon.js');
+            $this->AddJsFile('fancyzoom.js');
+   			$this->AddJsFile('/js/library/jquery.gardenmorepager.js');
+            $this->AddJsFile('addon.js');
             $PictureModel = new Gdn_Model('AddonPicture');
             $this->PictureData = $PictureModel->GetWhere(array('AddonID' => $AddonID));
             
@@ -98,6 +98,7 @@ class AddonController extends AddonsController {
             }
    
             $this->View = 'addon';
+				$this->Title($this->Addon->Name.' '.$this->Addon->Version.' by '.$this->Addon->InsertName);
          }
       } else {
          $this->ApprovedData = $this->AddonModel->GetWhere(array('DateReviewed is not null' => ''), 'DateUpdated', 'desc', 5);
@@ -115,10 +116,8 @@ class AddonController extends AddonsController {
     */
    public function Add() {
 		$this->Permission('Addons.Addon.Add');
-      if ($this->Head) {
-         $this->Head->AddScript('/js/library/jquery.autogrow.js');
-         $this->Head->AddScript('/applications/addons/js/forms.js');
-      }
+		$this->AddJsFile('/js/library/jquery.autogrow.js');
+		$this->AddJsFile('forms.js');
       
       $this->Form->SetModel($this->AddonModel);
       $AddonTypeModel = new Gdn_Model('AddonType');
@@ -161,10 +160,8 @@ class AddonController extends AddonsController {
    public function Edit($AddonID = '') {
 		$this->Permission('Addons.Addon.Add');
 		
-      if ($this->Head) {
-         $this->Head->AddScript('/js/library/jquery.autogrow.js');
-         $this->Head->AddScript('/applications/addons/js/forms.js');
-      }
+		$this->AddJsFile('/js/library/jquery.autogrow.js');
+		$this->AddJsFile('forms.js');
       
 		$Session = Gdn::Session();
       $Addon = $this->AddonModel->GetID($AddonID);
@@ -212,7 +209,7 @@ class AddonController extends AddonsController {
             $TmpFile = $Upload->ValidateUpload('File');
             $Extension = pathinfo($Upload->GetUploadedFileName(), PATHINFO_EXTENSION);
             
-            // Generate the target image name
+            // Generate the target name
             $TargetFile = $Upload->GenerateTargetName(PATH_ROOT . DS . 'uploads', $Extension);
             $FileBaseName = pathinfo($TargetFile, PATHINFO_BASENAME);
             
@@ -348,10 +345,8 @@ class AddonController extends AddonsController {
 		$this->Version = $VanillaVersion;
 			
 		$this->Sort = $Sort;
-      if ($this->Head) {
-			$this->Head->AddScript('/js/library/jquery.gardenmorepager.js');
-         $this->Head->AddScript('/applications/addons/js/browse.js');
-      }
+		$this->AddJsFile('/js/library/jquery.gardenmorepager.js');
+		$this->AddJsFile('browse.js');
 
 		if(!is_numeric($Limit))
 			$Limit = Gdn::Config('Garden.Search.PerPage', 20);

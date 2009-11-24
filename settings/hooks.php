@@ -13,6 +13,46 @@ class AddonsHooks implements Gdn_IPlugin {
    public function Controller_Event_Handler($Sender) {
       // Do something
    }
+   
+   // Make sure that all translations are in the GDN_Translation table for the "source" language
+   public function Gdn_Locale_BeforeTranslate_Handler(&$Sender) {
+      $Code = ArrayValue('Code', $Sender->EventArguments, '');
+      if ($Code != '' && !in_array($Code, $this->GetTranslations())) {
+         $Session = Gdn::Session();
+         // If the code wasn't in the source list, insert it
+         $Database = Gdn::Database();
+         $Database->SQL()->Replace('Translation', array(
+            'Value' => $Code,
+            'UserLanguageID' => 1,
+            'Application' => $this->_EnabledApplication(),
+            'InsertUserID' => $Session->UserID,
+            'DateInserted' => Format::ToDateTime(),
+            'UpdateUserID' => $Session->UserID,
+            'DateUpdated' => Format::ToDateTime()
+            ), array('Value' => $Code));
+      }
+   }
+
+   private $_EnabledApplication = 'Vanilla';   
+   public function Gdn_Dispatcher_AfterEnabledApplication_Handler(&$Sender) {
+      $this->_EnabledApplication = ArrayValue('EnabledApplication', $Sender->EventArguments, 'Vanilla'); // Defaults to "Vanilla"
+   }
+   private function _EnabledApplication() {
+      return $this->_EnabledApplication;
+   }
+   
+   private $_Translations = FALSE;
+   private function GetTranslations() {
+      if (!is_array($this->_Translations)) {
+         $TranslationModel = new Gdn_Model('Translation');
+         $Translations = $TranslationModel->GetWhere(array('UserLanguageID' => 1));
+         $this->_Translations = array();
+         foreach ($Translations as $Translation) {
+            $this->_Translations[] = $Translation->Value;
+         }
+      }
+      return $this->_Translations;
+   }
 
    public function Setup() {
       

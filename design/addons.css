@@ -717,11 +717,11 @@ div.SearchForm div.Options {
    font-size: 100%;
    padding: 8px 0 0;
 }
-div.SearchForm div.Options a {
+div.SearchForm a {
    padding: 3px 4px 2px;
    margin: 0 2px;
 }
-div.SearchForm div.Options a.Active {
+div.SearchForm a.Active {
    background: #076C8E;
    border-bottom: 1px solid #fff;
    color: #fff;
