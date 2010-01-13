@@ -1,11 +1,11 @@
 <?php if (!defined('APPLICATION')) exit();
 /*
-Copyright 2008, 2009 Mark O'Sullivan
+Copyright 2008, 2009 Vanilla Forums Inc.
 This file is part of Garden.
 Garden is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 Garden is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with Garden.  If not, see <http://www.gnu.org/licenses/>.
-Contact Mark O'Sullivan at mark [at] lussumo [dot] com
+Contact Vanilla Forums Inc. at support [at] vanillaforums [dot] com
 */
 
 /**
@@ -63,9 +63,7 @@ class AddonController extends AddonsController {
             $this->SetData('CommentData', $this->CommentData = $this->AddonCommentModel->Get($AddonID, $Limit, $this->Offset), TRUE);
    
             $PagerFactory = new PagerFactory();
-            $this->Pager = $PagerFactory->GetPager('MorePager', $this);
-            $this->Pager->MoreCode = '%1$s more comments';
-            $this->Pager->LessCode = '%1$s older comments';
+            $this->Pager = $PagerFactory->GetPager('Pager', $this);
             $this->Pager->ClientID = 'Pager';
             $this->Pager->Configure(
                $this->Offset,
@@ -86,29 +84,24 @@ class AddonController extends AddonsController {
                $this->SetJson('MoreRow', $this->Pager->ToString('more'));
             }
             
-            $Session = Gdn::Session();
-            if ($Session->UserID == $this->Addon->InsertUserID || $Session->CheckPermission('Addons.Addon.Manage')) {
-               $this->SideMenu = new Gdn_SideMenuModule($this);
-               $this->SideMenu->AddLink('Option1', 'Edit Details', '/addon/edit/'.$this->Addon->AddonID, FALSE, array('class' => 'Popup'));
-               $this->SideMenu->AddLink('Option2', 'Upload New Version', '/addon/newversion/'.$this->Addon->AddonID, FALSE, array('class' => 'Popup'));
-               $this->SideMenu->AddLink('Option3', 'Upload Screen', '/addon/addpicture/'.$this->Addon->AddonID, FALSE, array('class' => 'Popup'));
-               $this->SideMenu->AddLink('Option4', 'Upload Icon', '/addon/icon/'.$this->Addon->AddonID, FALSE, array('class' => 'Popup'));
-               $this->SideMenu->AddLink('Option5', $this->Addon->DateReviewed == '' ? 'Approve This Version' : 'Unapprove This Version', '/addon/approve/'.$this->Addon->AddonID, array('Addons.Addon.Approve'), array('class' => 'Popup ApproveAddon'));
-               $this->SideMenu->AddLink('Option6', 'Delete Addon', '/addon/delete/'.$this->Addon->AddonID.'?Target=/addon', FALSE, array('class' => 'Popup DeleteAddon'));
-            }
-   
             $this->View = 'addon';
 				$this->Title($this->Addon->Name.' '.$this->Addon->Version.' by '.$this->Addon->InsertName);
          }
       } else {
+			$this->View = 'browse';
+			$this->Browse();
+			return;
+		/*
          $this->ApprovedData = $this->AddonModel->GetWhere(array('DateReviewed is not null' => ''), 'DateUpdated', 'desc', 5);
          $ApprovedIDs = ConsolidateArrayValuesByKey($this->ApprovedData->ResultArray(), 'AddonID');
          if (count($ApprovedIDs) > 0)
             $this->AddonModel->SQL->WhereNotIn('a.AddonID', $ApprovedIDs);
             
          $this->NewData = $this->AddonModel->GetWhere(FALSE, 'DateUpdated', 'desc', 5);
+		*/
       }
-      $this->Render();
+  		$this->AddModule('AddonHelpModule');
+		$this->Render();
    }
    
    /**
@@ -353,6 +346,37 @@ class AddonController extends AddonsController {
 		
       $this->Filter = $FilterToType;
 		$Search = GetIncomingValue('Form/Keywords', '');
+		$this->_BuildBrowseWheres($Search);
+				
+		$SortField = $Sort == 'recent' ? 'DateUpdated' : 'CountDownloads';
+		$ResultSet = $this->AddonModel->GetWhere(FALSE, $SortField, 'desc', $Limit, $Offset);
+		$this->SetData('SearchResults', $ResultSet, TRUE);
+		$this->_BuildBrowseWheres($Search);
+		$NumResults = $this->AddonModel->GetCount(FALSE);
+		
+		// Build a pager
+		$PagerFactory = new PagerFactory();
+		$Pager = $PagerFactory->GetPager('Pager', $this);
+		$Pager->MoreCode = '›';
+		$Pager->LessCode = '‹';
+		$Pager->ClientID = 'Pager';
+		$Pager->Configure(
+			$Offset,
+			$Limit,
+			$NumResults,
+			'addon/browse/'.$FilterToType.'/'.$Sort.'/'.$this->Version.'/%1$s/%2$s/?Form/Keywords='.Format::Url($Search)
+		);
+		$this->SetData('Pager', $Pager, TRUE);
+      
+      if ($this->_DeliveryType != DELIVERY_TYPE_ALL)
+         $this->SetJson('MoreRow', $Pager->ToString('more'));
+      
+		$this->AddModule('AddonHelpModule');
+		
+		$this->Render();
+	}
+	
+	private function _BuildBrowseWheres($Search = '') {
       if ($Search != '') {
          $this->AddonModel
             ->SQL
@@ -371,34 +395,6 @@ class AddonController extends AddonsController {
 			$this->AddonModel
 				->SQL
 				->Where('t.Label', substr($this->Filter, 0, -1));
-				
-		$SortField = $Sort == 'recent' ? 'DateUpdated' : 'CountDownloads';
-		$ResultSet = $this->AddonModel->GetWhere(FALSE, $SortField, 'desc', $Limit, $Offset);
-		$this->SetData('SearchResults', $ResultSet, TRUE);
-		$NumResults = $ResultSet->NumRows();
-		if ($NumResults >= $Limit)
-			$NumResults++;
-		
-		// Build a pager
-		$PagerFactory = new PagerFactory();
-		$Pager = $PagerFactory->GetPager('MorePager', $this);
-		$Pager->MoreCode = 'More';
-		$Pager->LessCode = 'Previous';
-		$Pager->ClientID = 'Pager';
-		$Pager->Configure(
-			$Offset,
-			$Limit,
-			$Offset + $NumResults,
-			'addon/browse/'.$FilterToType.'/'.$Sort.'/'.$this->Version.'/%1$s/%2$s/?Form/Keywords='.Format::Url($Search)
-		);
-		$this->SetData('Pager', $Pager, TRUE);
-      
-      if ($this->_DeliveryType != DELIVERY_TYPE_ALL) {
-         $this->SetJson('LessRow', $Pager->ToString('less'));
-         $this->SetJson('MoreRow', $Pager->ToString('more'));
-      }
-      
-		$this->Render();
 	}
    
    public function AddPicture($AddonID = '') {

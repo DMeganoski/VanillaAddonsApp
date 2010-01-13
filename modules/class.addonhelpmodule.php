@@ -8,5 +8,17 @@ You should have received a copy of the GNU General Public License along with Gar
 Contact Vanilla Forums Inc. at support [at] vanillaforums [dot] com
 */
 
-$Definition['TestedWith'] = 'Testing information';
-$Definition['AddonTypeID'] = 'Addon type';
+/**
+ * Garden.Modules
+ */
+
+/**
+ * Renders the "You should register or sign in" panel box.
+ */
+class AddonHelpModule extends Module {
+   
+   public function AssetTarget() {
+      return 'Panel';
+   }
+   
+}

@@ -62,10 +62,11 @@ class Gdn_AddonModel extends Gdn_Model {
       return $this->SQL
          ->Select('a.AddonID', 'count', 'CountAddons')
          ->From('Addon a')
+         ->Join('AddonType t', 'a.AddonTypeID = t.AddonTypeID')
          ->Where($Wheres)
          ->Get()
          ->FirstRow()
-         ->CountDiscussions;
+         ->CountAddons;
    }
 
    public function GetID($AddonID, $Wheres = '') {

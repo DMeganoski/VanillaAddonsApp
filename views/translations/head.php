@@ -34,7 +34,7 @@ if (!property_exists($this, 'HideSearch')) {
 				if ($Session->IsValid()) {
 					echo '<li>'.Anchor('Create a New Translation', '/translations/add').'</li>';
 				} else {
-					echo '<li>'.Anchor('Sign In', '/entry/?Return=/translations').'</li>';
+					echo '<li>'.Anchor('Sign In', '/entry/?Return=/translations', 'SignInPopup').'</li>';
 				}
 			?>
 			</ul>
