@@ -53,6 +53,12 @@ class AddonsHooks implements Gdn_IPlugin {
       }
       return $this->_Translations;
    }
+   
+   public function ProfileController_AfterPreferencesDefined_Handler(&$Sender) {
+      $Sender->Preferences['Email Notifications']['Email.AddonComment'] = Gdn::Translate('Notify me when people comment on my addons.');
+      $Sender->Preferences['Email Notifications']['Email.AddonCommentMention'] = Gdn::Translate('Notify me when people mention me in addon comments.');
+   }
+   
 
    public function Setup() {
       

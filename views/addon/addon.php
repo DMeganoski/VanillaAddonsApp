@@ -88,10 +88,7 @@ foreach ($this->CommentData->Result() as $Comment) {
 		<ul class="Info<?php echo ($Comment->InsertUserID == $Session->UserID ? ' Mine' : '') ?>">
 			<li class="Author">
 				<?php 
-            $Author = new stdClass();
-            $Author->UserID = $Comment->InsertUserID;
-            $Author->Name = $Comment->InsertName;
-            $Author->Photo = $Comment->InsertPhoto;
+            $Author = UserBuilder($Comment, 'Insert');
 				echo UserPhoto($Author);
 				echo UserAnchor($Author);
 				?>

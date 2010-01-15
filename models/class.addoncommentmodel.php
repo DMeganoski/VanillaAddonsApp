@@ -16,6 +16,7 @@ class Gdn_AddonCommentModel extends Gdn_Model {
    
    public function Get($AddonID, $Limit, $Offset = 0) {
       $this->AddonCommentQuery();
+      $this->FireEvent('BeforeGet');
       return $this->SQL
          ->Where('c.AddonID', $AddonID)
          ->OrderBy('c.DateInserted', 'asc')
