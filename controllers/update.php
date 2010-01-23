@@ -76,7 +76,7 @@ class UpdateController extends AddonsController {
                   ->Select('a.AddonID, v.Version')
                   ->From('Addon a')
                   ->Join('AddonVersion v', 'a.CurrentAddonVersionID = v.AddonVersionID')
-                  ->Join('Type t', 'a.AddonTypeID = t.AddonTypeID')
+                  ->Join('AddonType t', 'a.AddonTypeID = t.AddonTypeID')
                   ->Where('a.Name', $Name)
                   ->Where('t.Label', $Type)
                   ->Get()
