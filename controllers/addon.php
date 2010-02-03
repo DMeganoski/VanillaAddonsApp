@@ -332,7 +332,7 @@ class AddonController extends AddonsController {
 		if ($Sort != 'popular')
 			$Sort = 'recent';
 		
-		if (!in_array($VanillaVersion, array('0', '1', '2', '3')))
+		if (!in_array($VanillaVersion, array('0', '1', '2')))
 			$VanillaVersion = '0';
 		
 		$this->Version = $VanillaVersion;
@@ -386,7 +386,7 @@ class AddonController extends AddonsController {
             ->EndWhereGroup();
 		}
 		
-		if (!in_array($this->Version, array('0', '3')))
+		if ($this->Version != 0)
 			$this->AddonModel
 				->SQL
 				->Where('a.Vanilla2', $this->Version == '1' ? '0' : '1');

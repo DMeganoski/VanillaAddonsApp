@@ -27,37 +27,15 @@ if (!property_exists($this, 'HideSearch')) {
 		?>
 	</div>
 	<div class="Options">
-		<strong>↳</strong> Only show addons for 
+		<strong>↳</strong> Show addons for
 		<?php
-		if ($this->Version == '0') {
-			$CssClass = 'Active';
-			$Version = '2';
-		} else if ($this->Version == '1') {
-			$CssClass = 'Active';
-			$Version = '3';
-		} else if ($this->Version == '2') {
-			$CssClass = '';
-			$Version = '0';
-		} else if ($this->Version == '3') {
-			$CssClass = '';
-			$Version = '1';
-		}
-		echo Anchor('Vanilla 1', $Url.$this->Sort.'/'.$Version.'/'.$Query, $CssClass);
-		
-		if ($this->Version == '0') {
-			$CssClass = 'Active';
-			$Version = '1';
-		} else if ($this->Version == '1') {
-			$CssClass = '';
-			$Version = '0';
-		} else if ($this->Version == '2') {
-			$CssClass = 'Active';
-			$Version = '3';
-		} else if ($this->Version == '3') {
-			$CssClass = '';
-			$Version = '2';
-		}
-		echo Anchor('Vanilla 2', $Url.$this->Sort.'/'.$Version.'/'.$Query, $CssClass);
+		$CssClass = $this->Version == '0' ? 'Active' : '';
+		echo Anchor('Both Vanilla Versions', $Url.$this->Sort.'/0/'.$Query, $CssClass);
+		echo ' or filter to ';
+		$CssClass = $this->Version == '1' ? 'Active' : '';
+		echo Anchor('Vanilla 1', $Url.$this->Sort.'/1/'.$Query, $CssClass);
+		$CssClass = $this->Version == '2' ? 'Active' : '';
+		echo Anchor('Vanilla 2', $Url.$this->Sort.'/2/'.$Query, $CssClass);
 		?>
 	</div>
 	<div class="Options OrderOptions">
