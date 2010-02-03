@@ -27,6 +27,10 @@ function WriteAddon($Addon, $Alt) {
 				<span><?php echo $Addon->Type; ?></span>
 			</li>
 			<li>
+				Author
+				<span><?php echo $Addon->InsertName; ?></span>
+			</li>
+			<li>
 				Downloads
 				<span><?php echo number_format($Addon->CountDownloads); ?></span>
 			</li>
