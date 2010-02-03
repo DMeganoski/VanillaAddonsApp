@@ -134,9 +134,7 @@ $PermissionModel->Define(array(
 // Set the intial member permissions.
 $PermissionModel->Save(array(
    'RoleID' => 8,
-   'Addons.Addon.Add' => 1,
-   'Addons.Addon.Manage' => 1,
-   'Addons.Comments.Manage' => 1
+   'Addons.Addon.Add' => 1
    ));
    
 // Set the initial administrator permissions.
