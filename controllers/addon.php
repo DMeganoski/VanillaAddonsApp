@@ -328,7 +328,24 @@ class AddonController extends AddonsController {
       $this->Render();
    }
    
-	public function Browse($FilterToType = 'all', $Sort = 'recent', $VanillaVersion = '0', $Offset = 0, $Limit = NULL) {
+	public function Browse($FilterToType = '', $Sort = '', $VanillaVersion = '', $Offset = 0, $Limit = NULL) {
+		// Implement user prefs
+		$Session = Gdn::Session();
+		if ($Session->IsValid()) {
+			if ($FilterToType != '') {
+				echo 'setting '.$FilterToType;
+				$Session->SetPreference('Addons.FilterType', $FilterToType);
+			}
+			if ($VanillaVersion != '')
+				$Session->SetPreference('Addons.FilterVanilla', $VanillaVersion);
+			if ($Sort != '')
+				$Session->SetPreference('Addons.Sort', $Sort);
+		}
+			
+		$FilterToType = $Session->GetPreference('Addons.FilterType', 'all');
+		$VanillaVersion = $Session->GetPreference('Addons.FilterVanilla', '0');
+		$Sort = $Session->GetPreference('Addons.Sort', 'recent');
+		
 		if ($Sort != 'popular')
 			$Sort = 'recent';
 		
