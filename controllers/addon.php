@@ -333,7 +333,6 @@ class AddonController extends AddonsController {
 		$Session = Gdn::Session();
 		if ($Session->IsValid()) {
 			if ($FilterToType != '') {
-				echo 'setting '.$FilterToType;
 				$Session->SetPreference('Addons.FilterType', $FilterToType);
 			}
 			if ($VanillaVersion != '')
