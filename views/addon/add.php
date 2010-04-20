@@ -4,7 +4,7 @@ if ($this->DeliveryType() == DELIVERY_TYPE_ALL)
 	echo $this->FetchView('head');
 
 ?>
-<h1><?php echo Gdn::Translate('Create a new Addon'); ?></h1>
+<h1><?php echo T('Create a new Addon'); ?></h1>
 <?php
 echo $this->Form->Open(array('enctype' => 'multipart/form-data'));
 echo $this->Form->Errors();
@@ -41,14 +41,14 @@ echo $this->Form->Errors();
 		?>
 	</li>
 	<li>
-		<div class="Info"><?php echo Gdn::Translate('Describe your addon in as much detail as possible. Html allowed.'); ?></div>
+		<div class="Info"><?php echo T('Describe your addon in as much detail as possible. Html allowed.'); ?></div>
 		<?php
 			echo $this->Form->Label('Description', 'Description');
 			echo $this->Form->TextBox('Description', array('multiline' => TRUE));
 		?>
 	</li>
 	<li>
-		<div class="Info"><?php echo Gdn::Translate('Specify any requirements your addon has, including: php version, mysql version, jquery version, browser & version, etc'); ?></div>
+		<div class="Info"><?php echo T('Specify any requirements your addon has, including: php version, mysql version, jquery version, browser & version, etc'); ?></div>
 		<?php
 			echo $this->Form->Label('Requirements', 'Requirements');
 			echo $this->Form->TextBox('Requirements', array('multiline' => TRUE));
@@ -56,7 +56,7 @@ echo $this->Form->Errors();
 	</li>
 	<!--
 	<li>
-		<div class="Info"><?php echo Gdn::Translate('Specify which versions you have tested your addon with: PHP, MySQL, jQuery, etc'); ?></div>
+		<div class="Info"><?php echo T('Specify which versions you have tested your addon with: PHP, MySQL, jQuery, etc'); ?></div>
 		<?php
 			echo $this->Form->Label('Testing', 'TestedWith');
 			echo $this->Form->TextBox('TestedWith', array('multiline' => TRUE));
@@ -64,7 +64,7 @@ echo $this->Form->Errors();
 	</li>
 	-->
 	<li>
-		<div class="Info"><?php echo Gdn::Translate('By uploading a file you certify that you have the right to distribute the file and that it does not violate the Terms of Service.'); ?></div>
+		<div class="Info"><?php echo T('By uploading a file you certify that you have the right to distribute the file and that it does not violate the Terms of Service.'); ?></div>
 		<?php
 			echo $this->Form->Label('Addon Archive (2mb max)', 'File');
 			echo $this->Form->Input('File', 'file', array('class' => 'File'));

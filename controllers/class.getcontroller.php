@@ -13,7 +13,7 @@ Contact Vanilla Forums Inc. at support [at] vanillaforums [dot] com
  */
 class GetController extends AddonsController {
    
-   public $Uses = array('Form', 'Database', 'Gdn_AddonModel');
+   public $Uses = array('Form', 'Database', 'AddonModel');
 	
    public function Index($AddonID = '', $ServeFile = '0') {
 		$this->AddJsFile('js/library/jquery.js');
@@ -36,11 +36,11 @@ class GetController extends AddonsController {
 				// Record this download
 				$this->Database->SQL()->Insert('Download', array(
 					'AddonID' => $this->Addon->AddonID,
-					'DateInserted' => Format::ToDateTime(),
+					'DateInserted' => Gdn_Format::ToDateTime(),
 					'RemoteIp' => @$_SERVER['REMOTE_ADDR']
 				));
 				$this->AddonModel->SetProperty($this->Addon->AddonID, 'CountDownloads', $this->Addon->CountDownloads + 1);
-				Gdn_FileSystem::ServeFile('uploads/'.$this->Addon->File, Format::Url($this->Addon->Name.'-'.$this->Addon->Version));
+				Gdn_FileSystem::ServeFile('uploads/'.$this->Addon->File, Gdn_Format::Url($this->Addon->Name.'-'.$this->Addon->Version));
 			}
 		}
 		

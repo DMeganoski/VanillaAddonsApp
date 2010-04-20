@@ -26,9 +26,9 @@ class AddonsHooks implements Gdn_IPlugin {
             'UserLanguageID' => 1,
             'Application' => $this->_EnabledApplication(),
             'InsertUserID' => $Session->UserID,
-            'DateInserted' => Format::ToDateTime(),
+            'DateInserted' => Gdn_Format::ToDateTime(),
             'UpdateUserID' => $Session->UserID,
-            'DateUpdated' => Format::ToDateTime()
+            'DateUpdated' => Gdn_Format::ToDateTime()
             ), array('Value' => $Code));
       }
    }
@@ -55,8 +55,8 @@ class AddonsHooks implements Gdn_IPlugin {
    }
    
    public function ProfileController_AfterPreferencesDefined_Handler(&$Sender) {
-      $Sender->Preferences['Email Notifications']['Email.AddonComment'] = Gdn::Translate('Notify me when people comment on my addons.');
-      $Sender->Preferences['Email Notifications']['Email.AddonCommentMention'] = Gdn::Translate('Notify me when people mention me in addon comments.');
+      $Sender->Preferences['Email Notifications']['Email.AddonComment'] = T('Notify me when people comment on my addons.');
+      $Sender->Preferences['Email Notifications']['Email.AddonCommentMention'] = T('Notify me when people mention me in addon comments.');
    }
    
 

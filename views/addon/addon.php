@@ -30,7 +30,7 @@ if ($Session->UserID == $this->Addon->InsertUserID || $Session->CheckPermission(
 if ($this->Addon->Icon != '')
 	echo '<img class="Icon" src="'.Url('uploads/ai'.$this->Addon->Icon).'" />';
 	
-echo Format::Html($this->Addon->Description);
+echo Gdn_Format::Html($this->Addon->Description);
 ?>
 </div>
 <?php
@@ -44,7 +44,7 @@ if ($this->Addon->DateReviewed == '')
 		<dt>Version</dt>
 		<dd><?php echo $this->Addon->Version.'&nbsp;'; ?></dd>
 		<dt>Released</dt>
-		<dd><?php echo Format::Date($this->Addon->DateUploaded); ?></dd>
+		<dd><?php echo Gdn_Format::Date($this->Addon->DateUploaded); ?></dd>
 		<dt>Downloads</dt>
 		<dd><?php echo $this->Addon->CountDownloads; ?></dd>
 	</dl>
@@ -57,7 +57,7 @@ if ($this->Addon->DateReviewed == '')
 		<dd><span class="Vanilla<?php echo $VanillaVersion; ?>">Vanilla <?php echo $VanillaVersion; ?></span></dd>
 	</dl>
 	<p>Other Requirements (if any):</p>
-	<?php echo Format::Display($this->Addon->Requirements); ?>
+	<?php echo Gdn_Format::Display($this->Addon->Requirements); ?>
 </div>
 <?php
 if ($this->PictureData->NumRows() > 0) {
@@ -95,7 +95,7 @@ foreach ($this->CommentData->Result() as $Comment) {
 			</li>
 			<li class="Created">
 				<?php
-				echo Format::Date($Comment->DateInserted);
+				echo Gdn_Format::Date($Comment->DateInserted);
 				?>
 			</li>
 		</ul>
@@ -104,7 +104,7 @@ foreach ($this->CommentData->Result() as $Comment) {
 			echo Anchor('Delete', '/addon/deletecomment/'.$Comment->AddonCommentID.'/'.$Session->TransientKey().'?Return='.urlencode(Gdn_Url::Request()), 'DeleteComment');
 
 		?>
-		<div class="Body"><?php echo Format::To($Comment->Body, $Comment->Format); ?></div>
+		<div class="Body"><?php echo Gdn_Format::To($Comment->Body, $Comment->Format); ?></div>
 	</li>
 	<?php
 }
@@ -133,8 +133,8 @@ if ($this->DeliveryType() == DELIVERY_TYPE_ALL) {
 	} else {
 		?>
 		<div class="CommentOption">
-			<?php echo Gdn::Translate('Want to take part in this discussion? Click one of these:'); ?>
-			<?php echo Anchor('Sign In', '/entry/?Target='.urlencode($this->SelfUrl), 'Button SignInPopup'); ?> 
+			<?php echo T('Want to take part in this discussion? Click one of these:'); ?>
+			<?php echo Anchor('Sign In', '/entry/?Target='.urlencode($this->SelfUrl), 'Button'.(Gdn::Config('Garden.SignIn.Popup') ? ' SignInPopup' : '')); ?> 
 			<?php echo Anchor('Register For Membership', '/entry/?Target='.urlencode($this->SelfUrl), 'Button'); ?>      
 		</div>
 		<?php 

@@ -1,6 +1,6 @@
 <?php if (!defined('APPLICATION')) exit(); ?>
 <div class="Form">
-	<h2><?php echo Gdn::Translate('Create a New Translation'); ?></h2>
+	<h2><?php echo T('Create a New Translation'); ?></h2>
 	<?php
 	echo $this->Form->Open();
 	echo $this->Form->Errors();

@@ -27,5 +27,5 @@
 
 <div class="Box">
 	<h4>Don't have Vanilla yet?</h4>
-	<p class="ChunkyButton"><?php echo Anchor('Download Vanilla Now', '/download'); ?></p>
+	<?php echo Anchor('Download Vanilla Now', '/download', 'BigButton'); ?>
 </div>

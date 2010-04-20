@@ -40,7 +40,7 @@ class TranslationsController extends AddonsController {
 			if (!is_object($this->Language))
 				$this->View = 'NotFound';
 		} else {
-			$UserLanguageModel = new Gdn_UserLanguageModel();
+			$UserLanguageModel = new UserLanguageModel();
 			$this->LanguageData = $UserLanguageModel->Get();
 			$TranslationModel = new Gdn_Model('Translation');
 			$this->CountTranslations = $TranslationModel->GetCount();
@@ -50,7 +50,7 @@ class TranslationsController extends AddonsController {
 	
 	public function Mine() {
 		$Session = Gdn::Session();
-		$UserLanguageModel = new Gdn_UserLanguageModel();
+		$UserLanguageModel = new UserLanguageModel();
 		$this->LanguageData = $UserLanguageModel->Get(array('InsertUserID' => $Session->UserID));
 		$TranslationModel = new Gdn_Model('Translation');
 		$this->CountTranslations = $TranslationModel->GetCount();
@@ -63,9 +63,9 @@ class TranslationsController extends AddonsController {
     */
    public function Add() {
 		$this->Permission('Addons.Translations.Add');
-      $UserLanguageModel = new Gdn_UserLanguageModel();
+      $UserLanguageModel = new UserLanguageModel();
       $this->Form->SetModel($UserLanguageModel);
-		$LanguageModel = new Gdn_LanguageModel();
+		$LanguageModel = new LanguageModel();
 		$this->LanguageData = $LanguageModel->Get();
       
       if ($this->Form->AuthenticatedPostBack()) {
@@ -85,12 +85,12 @@ class TranslationsController extends AddonsController {
 		$this->AddJsFile('/js/library/jquery.autogrow.js');
 		$this->AddJsFile('forms.js');
       
-		$UserLanguageModel = new Gdn_UserLanguageModel();
+		$UserLanguageModel = new UserLanguageModel();
       $this->UserLanguage = $UserLanguageModel->GetID($UserLanguageID);
       if (!$this->UserLanguage)
-         Redirect('garden/home/filenotfound');
+         Redirect('dashboard/home/filenotfound');
 			
-		$TranslationModel = new Gdn_TranslationModel();
+		$TranslationModel = new TranslationModel();
 		$this->CountTranslations = $TranslationModel->GetCount();
 		$this->TranslationData = $TranslationModel->Get();
          
@@ -110,7 +110,7 @@ class TranslationsController extends AddonsController {
          $this->Form->SetData($this->UserLanguage);
       } else {
          if ($this->Form->Save() !== FALSE) {
-            $this->StatusMessage = Translate("Your changes have been saved successfully.");
+            $this->StatusMessage = T("Your changes have been saved successfully.");
             $this->RedirectUrl = Url('/translation/'.$UserLanguageID.'/');
          }
       }

@@ -4,7 +4,7 @@ if ($this->DeliveryType() == DELIVERY_TYPE_ALL)
 	echo $this->FetchView('head');
    
 ?>
-<h1><?php echo Gdn::Translate('Edit Addon'); ?></h1>
+<h1><?php echo T('Edit Addon'); ?></h1>
 <?php
 echo $this->Form->Open();
 echo $this->Form->Errors();
@@ -41,7 +41,7 @@ echo $this->Form->Errors();
 		?>
 	</li>
 	<li>
-		<div class="Info"><?php echo Gdn::Translate('Specify any requirements your addon has, including: php version, mysql version, jquery version, browser & version, etc'); ?></div>
+		<div class="Info"><?php echo T('Specify any requirements your addon has, including: php version, mysql version, jquery version, browser & version, etc'); ?></div>
 		<?php
 			echo $this->Form->Label('Requirements', 'Requirements');
 			echo $this->Form->TextBox('Requirements', array('multiline' => TRUE));

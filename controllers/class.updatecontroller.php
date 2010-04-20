@@ -1,4 +1,12 @@
 <?php if (!defined('APPLICATION')) exit();
+/*
+Copyright 2008, 2009 Vanilla Forums Inc.
+This file is part of Garden.
+Garden is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+Garden is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+You should have received a copy of the GNU General Public License along with Garden.  If not, see <http://www.gnu.org/licenses/>.
+Contact Vanilla Forums Inc. at support [at] vanillaforums [dot] com
+*/
 
 /// <summary>
 /// Update Controller
@@ -16,7 +24,7 @@ class UpdateController extends AddonsController {
       $CountConversationMessages = GetIncomingValue('messages', '');
       $CountDiscussions = GetIncomingValue('discussions', '');
       $CountComments = GetIncomingValue('comments', '');
-      $UpdateChecks = Format::Unserialize($this->_GetJsonString('updateChecks'));
+      $UpdateChecks = Gdn_Format::Unserialize($this->_GetJsonString('updateChecks'));
       $UpdateCheckID = 0;
       
       // Get the UpdateCheckSourceID
@@ -31,7 +39,7 @@ class UpdateController extends AddonsController {
          $UpdateCheckSourceID = $SQL->Insert('UpdateCheckSource',
             array(
                'Location' => $Source,
-               'DateInserted' => Format::ToDateTime(),
+               'DateInserted' => Gdn_Format::ToDateTime(),
                'RemoteIp' => @$_SERVER['REMOTE_ADDR']
             )
          );
@@ -47,7 +55,7 @@ class UpdateController extends AddonsController {
                'CountComments' => intval($CountComments),
                'CountConversations' => intval($CountConversations),
                'CountConversationMessages' => intval($CountConversationMessages),
-               'DateInserted' => Format::ToDateTime(),
+               'DateInserted' => Gdn_Format::ToDateTime(),
                'RemoteIp' => @$_SERVER['REMOTE_ADDR']
             )
          );
@@ -125,17 +133,17 @@ class UpdateController extends AddonsController {
       // Send messages back to the requesting application
       exit(json_encode(array(
          'messages' => '', // <-- These messages must be an array of GDN_Message table rows in associative array format.
-         'response' => Format::Serialize($Response)
+         'response' => Gdn_Format::Serialize($Response)
       )));
       /*
        You can also send back messages to be injected into the remote application's pages. They should be in the following format:
       exit(json_encode(array(
-         'messages' => Format::Serialize(array(
+         'messages' => Gdn_Format::Serialize(array(
             array(
                'Content' => '<div class="Info">This is a test!</div>',
                'AllowDismiss' => '1',
                'Enabled' => '1',
-               'Application' => 'Garden',
+               'Application' => 'Dashboard',
                'Controller' => 'Settings',
                'Method' => 'Index',
                'AssetTarget' => 'Content'
@@ -144,19 +152,19 @@ class UpdateController extends AddonsController {
                'Content' => '<div class="Info">This is another test!</div>',
                'AllowDismiss' => '0',
                'Enabled' => '1',
-               'Application' => 'Garden',
+               'Application' => 'Dashboard',
                'Controller' => 'Base',
                'Method' => '',
                'AssetTarget' => 'Content'
             )
          )), // <-- These messages must be an array of GDN_Message table rows in associative array format.
-         'response' => Format::Serialize($Response)
+         'response' => Gdn_Format::Serialize($Response)
       )));
        The Messages will be inserted into the remote databases GDN_Message table like this:
          'Content' => ArrayValue('Content', $Message, ''),
          'AllowDismiss' => ArrayValue('AllowDismiss', $Message, '1'),
          'Enabled' => ArrayValue('Enabled', $Message, '1'),
-         'Application' => ArrayValue('Application', $Message, 'Garden'),
+         'Application' => ArrayValue('Application', $Message, 'Dashboard'),
          'Controller' => ArrayValue('Controller', $Message, 'Settings'),
          'AssetTarget' => ArrayValue('AssetTarget', $Message, 'Content'),
       */
@@ -171,7 +179,7 @@ class UpdateController extends AddonsController {
          ->Get()
          ->FirstRow();
       if ($Data) {
-         Redirect('/addon/'.$Data->AddonID.'/'.Format::Url($Data->Name));
+         Redirect('/addon/'.$Data->AddonID.'/'.Gdn_Format::Url($Data->Name));
       } else {
          Redirect('/addon/notfound/');
       }

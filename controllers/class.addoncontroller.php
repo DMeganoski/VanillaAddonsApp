@@ -13,7 +13,7 @@ Contact Vanilla Forums Inc. at support [at] vanillaforums [dot] com
  */
 class AddonController extends AddonsController {
    
-   public $Uses = array('Form', 'Gdn_AddonModel', 'Gdn_AddonCommentModel');
+   public $Uses = array('Form', 'AddonModel', 'AddonCommentModel');
 	public $Filter = 'all';
 	public $Sort = 'recent';
 	public $Version = '0'; // The version of Vanilla to filter to (0 is no filter)
@@ -69,7 +69,7 @@ class AddonController extends AddonsController {
                $this->Offset,
                $Limit,
                $this->Addon->CountComments,
-               'addon/'.$AddonID.'/'.Format::Url($this->Addon->Name).'/%1$s/%2$s/'
+               'addon/'.$AddonID.'/'.Gdn_Format::Url($this->Addon->Name).'/%1$s/%2$s/'
             );
          
             // Define the form for the comment input
@@ -143,7 +143,7 @@ class AddonController extends AddonsController {
             if ($AddonID !== FALSE) {
                // Redirect to the new addon
                $Name = $this->Form->GetFormValue('Name', '');
-               Redirect('addon/'.$AddonID.'/'.Format::Url($Name));
+               Redirect('addon/'.$AddonID.'/'.Gdn_Format::Url($Name));
             }
          }
       }
@@ -159,7 +159,7 @@ class AddonController extends AddonsController {
 		$Session = Gdn::Session();
       $Addon = $this->AddonModel->GetID($AddonID);
       if (!$Addon)
-         Redirect('garden/home/filenotfound');
+         Redirect('dashboard/home/filenotfound');
          
       if ($Addon->InsertUserID != $Session->UserID)
          $this->Permission('Addons.Addon.Manage');
@@ -174,8 +174,8 @@ class AddonController extends AddonsController {
       } else {
          if ($this->Form->Save() !== FALSE) {
             $Addon = $this->AddonModel->GetID($AddonID);
-            $this->StatusMessage = Translate("Your changes have been saved successfully.");
-            $this->RedirectUrl = Url('/addon/'.$AddonID.'/'.Format::Url($Addon->Name));
+            $this->StatusMessage = T("Your changes have been saved successfully.");
+            $this->RedirectUrl = Url('/addon/'.$AddonID.'/'.Gdn_Format::Url($Addon->Name));
          }
       }
       
@@ -186,7 +186,7 @@ class AddonController extends AddonsController {
 		$Session = Gdn::Session();
       $Addon = $this->AddonModel->GetID($AddonID);
       if (!$Addon)
-         Redirect('garden/home/filenotfound');
+         Redirect('dashboard/home/filenotfound');
          
       if ($Addon->InsertUserID != $Session->UserID)
          $this->Permission('Addons.Addon.Manage');
@@ -223,8 +223,8 @@ class AddonController extends AddonsController {
             $NewVersionID = $this->Form->Save();
             if ($NewVersionID) {
                $this->AddonModel->Save(array('AddonID' => $AddonID, 'CurrentAddonVersionID' => $NewVersionID));
-               $this->StatusMessage = Translate("New version saved successfully.");
-               $this->RedirectUrl = Url('/addon/'.$AddonID.'/'.Format::Url($Addon->Name));
+               $this->StatusMessage = T("New version saved successfully.");
+               $this->RedirectUrl = Url('/addon/'.$AddonID.'/'.Gdn_Format::Url($Addon->Name));
             }
          }
       }
@@ -237,12 +237,12 @@ class AddonController extends AddonsController {
       $Addon = $this->Addon = $this->AddonModel->GetID($AddonID);
       $VersionModel = new Gdn_Model('AddonVersion');
       if ($Addon->DateReviewed == '') {
-         $VersionModel->Save(array('AddonVersionID' => $Addon->AddonVersionID, 'DateReviewed' => Format::ToDateTime()));
+         $VersionModel->Save(array('AddonVersionID' => $Addon->AddonVersionID, 'DateReviewed' => Gdn_Format::ToDateTime()));
       } else {
          $VersionModel->Update(array('DateReviewed' => null), array('AddonVersionID' => $Addon->AddonVersionID));
       }
       
-      Redirect('addon/'.$AddonID.'/'.Format::Url($Addon->Name));
+      Redirect('addon/'.$AddonID.'/'.Gdn_Format::Url($Addon->Name));
   }
 
    public function Delete($AddonID = '') {
@@ -252,7 +252,7 @@ class AddonController extends AddonsController {
 
       $Addon = $this->AddonModel->GetID($AddonID);
       if (!$Addon)
-         Redirect('garden/home/filenotfound');
+         Redirect('dashboard/home/filenotfound');
 
       if ($Session->UserID != $Addon->InsertUserID)
 			$this->Permission('Addons.Addon.Manage');
@@ -380,7 +380,7 @@ class AddonController extends AddonsController {
 			$Offset,
 			$Limit,
 			$NumResults,
-			'addon/browse/'.$FilterToType.'/'.$Sort.'/'.$this->Version.'/%1$s/%2$s/?Form/Keywords='.Format::Url($Search)
+			'addon/browse/'.$FilterToType.'/'.$Sort.'/'.$this->Version.'/%1$s/%2$s/?Form/Keywords='.Gdn_Format::Url($Search)
 		);
 		$this->SetData('Pager', $Pager, TRUE);
       
@@ -420,7 +420,7 @@ class AddonController extends AddonsController {
 
       $Addon = $this->AddonModel->GetID($AddonID);
       if (!$Addon)
-         Redirect('garden/home/filenotfound');
+         Redirect('dashboard/home/filenotfound');
 
       if ($Session->UserID != $Addon->InsertUserID)
 			$this->Permission('Addons.Addon.Manage');
@@ -496,7 +496,7 @@ class AddonController extends AddonsController {
 
       $Addon = $this->AddonModel->GetID($AddonID);
       if (!$Addon)
-         Redirect('garden/home/filenotfound');
+         Redirect('dashboard/home/filenotfound');
 
       if ($Session->UserID != $Addon->InsertUserID)
 			$this->Permission('Addons.Addon.Manage');

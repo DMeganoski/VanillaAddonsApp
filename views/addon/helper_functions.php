@@ -1,7 +1,7 @@
 <?php if (!defined('APPLICATION')) exit();
 
 function WriteAddon($Addon, $Alt) {
-	$Url = '/addon/'.$Addon->AddonID.'/'.Format::Url($Addon->Name);
+	$Url = '/addon/'.$Addon->AddonID.'/'.Gdn_Format::Url($Addon->Name);
 	?>
 	<li class="AddonRow<?php echo $Alt; ?>">
 		<h3><?php echo Anchor($Addon->Name, $Url); ?></h3>
@@ -9,7 +9,7 @@ function WriteAddon($Addon, $Alt) {
 		if ($Addon->Icon != '')
 			echo '<a class="Icon" href="'.Url($Url).'"><img src="'.Url('uploads/ai'.$Addon->Icon).'" /></a>';
 
-		echo Anchor(SliceString(Format::Text($Addon->Description), 300), $Url);
+		echo Anchor(SliceString(Gdn_Format::Text($Addon->Description), 300), $Url);
 		?>
 		<ul class="Meta">
 			<li class="<?php echo $Addon->Vanilla2 == '1' ? 'Vanilla2' : 'Vanilla1'; ?>">
@@ -40,7 +40,7 @@ function WriteAddon($Addon, $Alt) {
 			</li>
 			<li>
 				Updated
-				<span><?php echo Format::Date($Addon->DateUpdated); ?></span>
+				<span><?php echo Gdn_Format::Date($Addon->DateUpdated); ?></span>
 			</li>
 		</ul>
 	</li>

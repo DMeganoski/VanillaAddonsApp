@@ -9,13 +9,9 @@ Contact Vanilla Forums Inc. at support [at] vanillaforums [dot] com
 */
 
 /**
- * Garden.Modules
- */
-
-/**
  * Renders the "You should register or sign in" panel box.
  */
-class AddonHelpModule extends Module {
+class AddonHelpModule extends Gdn_Module {
    
    public function AssetTarget() {
       return 'Panel';

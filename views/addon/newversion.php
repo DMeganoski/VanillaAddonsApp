@@ -4,7 +4,7 @@ if ($this->DeliveryType() == DELIVERY_TYPE_ALL)
 	echo $this->FetchView('head');
 
 ?>
-<h2><?php echo Gdn::Translate('Upload a New Version'); ?></h2>
+<h2><?php echo T('Upload a New Version'); ?></h2>
 <?php
 
 echo $this->Form->Open(array('enctype' => 'multipart/form-data'));
@@ -12,7 +12,7 @@ echo $this->Form->Errors();
 ?>
 <ul>
 	<li>
-		<div class="Info"><?php echo Gdn::Translate('By uploading a file you certify that you have the right to distribute this addon and that it does not violate the Terms of Service.'); ?></div>
+		<div class="Info"><?php echo T('By uploading a file you certify that you have the right to distribute this addon and that it does not violate the Terms of Service.'); ?></div>
 		<?php echo $this->Form->Label('File to Upload (2mb max)', 'File'); ?>
 		<?php echo $this->Form->Input('File', 'file', array('class' => 'File')); ?>
 	</li>
@@ -24,7 +24,7 @@ echo $this->Form->Errors();
 	</li>
 	<!--
 	<li>
-		<div class="Info"><?php echo Gdn::Translate('Specify which versions you have tested the new version of your addon with: PHP, MySQL, jQuery, etc'); ?></div>
+		<div class="Info"><?php echo T('Specify which versions you have tested the new version of your addon with: PHP, MySQL, jQuery, etc'); ?></div>
 		<?php
 			echo $this->Form->Label('Testing Information', 'TestedWith');
 			echo $this->Form->TextBox('TestedWith', array('multiline' => TRUE));
