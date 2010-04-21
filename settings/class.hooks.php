@@ -61,6 +61,16 @@ class AddonsHooks implements Gdn_IPlugin {
    
 
    public function Setup() {
-      
+      $Database = Gdn::Database();
+      $Config = Gdn::Factory(Gdn::AliasConfig);
+      $Drop = C('Addons.Version') === FALSE ? TRUE : FALSE;
+      $Explicit = TRUE;
+      $Validation = new Gdn_Validation(); // This is going to be needed by structure.php to validate permission names
+      include(PATH_APPLICATIONS . DS . 'addons' . DS . 'settings' . DS . 'structure.php');
+
+      $ApplicationInfo = array();
+      include(CombinePaths(array(PATH_APPLICATIONS . DS . 'addons' . DS . 'settings' . DS . 'about.php')));
+      $Version = ArrayValue('Version', ArrayValue('Addons', $ApplicationInfo, array()), 'Undefined');
+      SaveToConfig('Addons.Version', $Version);
    }
 }
