@@ -38,7 +38,8 @@ class AddonController extends AddonsController {
    /**
     * Home Page
     */
-   public function Index($AddonID = '', $AddonName = '', $Offset = '', $Limit = '') {
+   public function Index($AddonID = '', $AddonName = '', $Page = '') {
+      list($Offset, $Limit) = OffsetLimit($Page, Gdn::Config('Garden.Search.PerPage', 20));
       if ($AddonID != '') {
          if (!is_numeric($Limit) || $Limit < 0)
             $Limit = 50;
@@ -306,7 +307,7 @@ class AddonController extends AddonsController {
       $this->Render();
    }
    
-	public function Browse($FilterToType = '', $Sort = '', $VanillaVersion = '', $Offset = 0, $Limit = NULL) {
+	public function Browse($FilterToType = '', $Sort = '', $VanillaVersion = '', $Page = '') {
 		// Implement user prefs
 		$Session = Gdn::Session();
 		if ($Session->IsValid()) {
@@ -338,8 +339,7 @@ class AddonController extends AddonsController {
 		$this->AddJsFile('/js/library/jquery.gardenmorepager.js');
 		$this->AddJsFile('browse.js');
 
-		if(!is_numeric($Limit))
-			$Limit = Gdn::Config('Garden.Search.PerPage', 20);
+      list($Offset, $Limit) = OffsetLimit($Page, Gdn::Config('Garden.Search.PerPage', 20));
 		
       $this->Filter = $FilterToType;
 		$Search = GetIncomingValue('Form/Keywords', '');
@@ -361,7 +361,7 @@ class AddonController extends AddonsController {
 			$Offset,
 			$Limit,
 			$NumResults,
-			'addon/browse/'.$FilterToType.'/'.$Sort.'/'.$this->Version.'/%1$s/%2$s/?Form/Keywords='.Gdn_Format::Url($Search)
+			'addon/browse/'.$FilterToType.'/'.$Sort.'/'.$this->Version.'/p%1$s/?Form/Keywords='.Gdn_Format::Url($Search)
 		);
 		$this->SetData('Pager', $Pager, TRUE);
       

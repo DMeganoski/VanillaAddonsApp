@@ -263,7 +263,11 @@ $Construct->Table('Discussion')
    ->Set();
 
 // Insert all of the existing comments into a new discussion for each addon
-if (!$Construct->CaptureOnly) {
+$Construct->Table('AddonComment');
+$AddonCommentExists = $Construct->TableExists();
+$Construct->Reset();
+
+if ($AddonCommentExists) {
    if ($SQL->Query('select AddonCommentID from GDN_AddonComment')->NumRows() > 0) {
       // Create discussions for addons with comments
       $SQL->Query("insert into GDN_Discussion
