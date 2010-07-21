@@ -361,7 +361,7 @@ class AddonController extends AddonsController {
 			$Offset,
 			$Limit,
 			$NumResults,
-			'addon/browse/'.$FilterToType.'/'.$Sort.'/'.$this->Version.'/p%1$s/?Form/Keywords='.Gdn_Format::Url($Search)
+			'addon/browse/'.$FilterToType.'/'.$Sort.'/'.$this->Version.'/%1$s/?Form/Keywords='.Gdn_Format::Url($Search)
 		);
 		$this->SetData('Pager', $Pager, TRUE);
       
