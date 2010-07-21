@@ -3,7 +3,7 @@ $Session = Gdn::Session();
 $VanillaVersion = $this->Addon->Vanilla2 == '1' ? '2' : '1';
 
 if ($this->DeliveryType() == DELIVERY_TYPE_ALL) {
-	echo $this->FetchView('head');
+	// echo $this->FetchView('head');
 	?>
 	<h1>
 		<div>
@@ -46,7 +46,7 @@ if ($this->DeliveryType() == DELIVERY_TYPE_ALL) {
 					<dt>Released</dt>
 					<dd><?php echo Gdn_Format::Date($this->Addon->DateUploaded); ?></dd>
 					<dt>Downloads</dt>
-					<dd><?php echo $this->Addon->CountDownloads; ?></dd>
+					<dd><?php echo number_format($this->Addon->CountDownloads); ?></dd>
 				</dl>
 			</div>
 			<div class="Box RequirementBox">
@@ -96,7 +96,10 @@ if ($this->DeliveryType() == DELIVERY_TYPE_ALL) {
 	?></h2>
 	<?php if (is_object($this->DiscussionData) && $this->DiscussionData->NumRows() > 0) { ?>
 	<ul class="DataList Discussions">
-		<?php include($this->FetchViewLocation('discussions', 'DiscussionsController', 'vanilla')); ?>
+		<?php
+		$this->ShowOptions = FALSE;
+		include($this->FetchViewLocation('discussions', 'DiscussionsController', 'vanilla'));
+		?>
 	</ul>
 	<?php
 	} else {

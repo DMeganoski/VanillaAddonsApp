@@ -5,18 +5,17 @@ if ($this->Addon->File == '') {
 } else {
 	echo 'Downloading: ' . $this->Addon->Name . ' version ' . $this->Addon->Version;
 ?></h1>
-<div class="DownloadInfo">
-	<h2>Your download should begin shortly</h2>
+<div class="Box DownloadInfo">
+	<strong>Your download should begin shortly</strong>
 	<p>If your download does not begin right away, <a href="<?php echo '/uploads/'.$this->Addon->File; ?>">click here to download now</a>.</p>
 	
-	<h2>Need help installing this addon?</h2>
+	<strong>Need help installing this addon?</strong>
 	<p>There should be a readme file in the addon with more specific instructions on how to install it. If you are still having problems, <a href="http://vanillaforums.org/discussions">ask for help on the community forums</a>.</p>
-</div>
-<div class="DownloadInfo">
-	<h2>Note</h2>
+
+	<strong>Note</strong>
 	<p>Vanilla Forums Inc cannot be held liable for issues that arise from the download or use of these addons.</p>
 	
-	<h2>Now what?</h2>
+	<strong>Now what?</strong>
 	<p>Head on back to the <a href="<?php echo Url('/addon/'.$this->Addon->AddonID); ?>"><?php echo $this->Addon->Name; ?> page</a>, search for <a href="http://vanillaforums.org/addons">more add-ons</a>, or you can <a href="http://vanillaforums.org/docs">learn how to make your own</a>.</p>
 </div>
 <?php
