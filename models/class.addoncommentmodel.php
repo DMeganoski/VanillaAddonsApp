@@ -16,10 +16,9 @@ class AddonCommentModel extends Gdn_Model {
    public function AddonCommentQuery() {
       $this->SQL->Select('c.*')
          ->Select('iu.Name', '', 'InsertName')
-         ->Select('iup.Name', '', 'InsertPhoto')
+         ->Select('iu.Photo', '', 'InsertPhoto')
          ->From('AddonComment c')
-         ->Join('User iu', 'c.InsertUserID = iu.UserID', 'left')
-         ->Join('Photo iup', 'iu.PhotoID = iup.PhotoID', 'left');
+         ->Join('User iu', 'c.InsertUserID = iu.UserID', 'left');
    }
    
    public function Get($AddonID, $Limit, $Offset = 0) {
@@ -107,7 +106,7 @@ class AddonCommentModel extends Gdn_Model {
             $Usernames = GetMentions($Fields['Body']);
             $UserModel = Gdn::UserModel();
             foreach ($Usernames as $Username) {
-               $User = $UserModel->GetWhere(array('Name' => $Username))->FirstRow();
+               $User = $UserModel->GetByUsername($Username);
                if ($User && $User->UserID != $Session->UserID) {
                   AddActivity(
                      $Session->UserID,

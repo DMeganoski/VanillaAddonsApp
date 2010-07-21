@@ -1,7 +1,7 @@
 <?php if (!defined('APPLICATION')) exit(); ?>
 
-<div class="UserOptions">
-	<h3>Make Your Own Addons!</h3>
+<div class="Box">
+	<h4>Make Your Own Addons!</h4>
 	<ul>
 	<?php
 		$Session = Gdn::Session();
@@ -27,5 +27,5 @@
 
 <div class="Box">
 	<h4>Don't have Vanilla yet?</h4>
-	<?php echo Anchor('Download Vanilla Now', '/download', 'BigButton'); ?>
+	<?php echo Anchor('Download Vanilla Now', '/download', 'GreenButton BigButton'); ?>
 </div>

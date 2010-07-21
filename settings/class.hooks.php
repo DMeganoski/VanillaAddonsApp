@@ -14,6 +14,35 @@ class AddonsHooks implements Gdn_IPlugin {
       // Do something
    }
    
+   // Write information about addons to the discussion if it is related to an addon
+   public function DiscussionController_BeforeCommentBody_Handler($Sender) {
+      $Discussion = GetValue('Object', $Sender->EventArguments);
+      $AddonID = GetValue('AddonID', $Discussion);
+      if (GetValue('Type', $Sender->EventArguments) == 'Discussion' && is_numeric($AddonID) && $AddonID > 0) {
+         $Data = Gdn::Database()->SQL()->Select('Name')->From('Addon')->Where('AddonID', $AddonID)->Get()->FirstRow();
+         if ($Data) {
+            echo '<div class="Warning">'.sprintf(T('This discussion is related to the %s addon.'), Anchor($Data->Name, 'addons/addon/'.$AddonID.'/'.Gdn_Format::Url($Data->Name))).'</div>';
+         }
+      }
+   }
+   
+   // Pass the addonid to the form
+   public function PostController_Render_Before($Sender) {
+      $AddonID = GetIncomingValue('AddonID');
+      if ($AddonID > 0 && is_object($Sender->Form))
+         $Sender->Form->AddHidden('AddonID', $AddonID);
+   }
+   
+   // Make sure to use the AddonID when saving discussions if present in the url
+   public function DiscussionModel_BeforeSaveDiscussion_Handler($Sender) {
+      $AddonID = GetIncomingValue('AddonID');
+      if (is_numeric($AddonID) && $AddonID > 0) {
+         $FormPostValues = GetValue('FormPostValues', $Sender->EventArguments);
+         $FormPostValues['AddonID'] = $AddonID;
+         $Sender->EventArguments['FormPostValues'] = $FormPostValues;
+      }
+   }
+   
    // Make sure that all translations are in the GDN_Translation table for the "source" language
    public function Gdn_Locale_BeforeTranslate_Handler(&$Sender) {
       $Code = ArrayValue('Code', $Sender->EventArguments, '');

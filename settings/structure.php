@@ -23,7 +23,7 @@ $Construct = $Database->Structure();
 $Construct->Table('AddonType')
    ->PrimaryKey('AddonTypeID')
    ->Column('Label', 'varchar(50)')
-   ->Column('Visible', array('1','0'), '1')
+   ->Column('Visible', 'tinyint(1)', '1')
    ->Set($Explicit, $Drop);
 
 if ($SQL->Select()->From('AddonType')->Get()->NumRows() == 0) {
@@ -46,12 +46,13 @@ $Construct->Table('Addon')
    ->Column('Requirements', 'text', TRUE)
    ->Column('CountComments', 'int', '0')
    ->Column('CountDownloads', 'int', '0')
-   ->Column('Visible', array('1', '0'), '1')
-   ->Column('Vanilla2', array('1', '0'), '1')
+   ->Column('Visible', 'tinyint(1)', '1')
+   ->Column('Vanilla2', 'tinyint(1)', '1')
    ->Column('DateInserted', 'datetime')
    ->Column('DateUpdated', 'datetime', TRUE)
    ->Set($Explicit, $Drop);
 
+/*
 $Construct->Table('AddonComment')
    ->PrimaryKey('AddonCommentID')
    ->Column('AddonID', 'int', FALSE, 'key')
@@ -60,6 +61,7 @@ $Construct->Table('AddonComment')
    ->Column('Format', 'varchar(20)', TRUE)
    ->Column('DateInserted', 'datetime')
    ->Set($Explicit, $Drop);
+*/
 
 $Construct->Table('AddonVersion')
    ->PrimaryKey('AddonVersionID')
@@ -166,6 +168,7 @@ if ($SQL->GetWhere('ActivityType', array('Name' => 'AddAddon'))->NumRows() == 0)
 if ($SQL->GetWhere('ActivityType', array('Name' => 'EditAddon'))->NumRows() == 0)
    $SQL->Insert('ActivityType', array('AllowComments' => '0', 'Name' => 'EditAddon', 'FullHeadline' => '%1$s edited an %8$s.', 'ProfileHeadline' => '%1$s edited an %8$s.', 'RouteCode' => 'addon', 'Public' => '1'));
 
+/*
 // People's comments on addons
 if ($SQL->GetWhere('ActivityType', array('Name' => 'AddonComment'))->NumRows() == 0)
    $SQL->Insert('ActivityType', array('AllowComments' => '0', 'Name' => 'AddonComment', 'FullHeadline' => '%1$s commented on %4$s %8$s.', 'ProfileHeadline' => '%1$s commented on %4$s %8$s.', 'RouteCode' => 'addon', 'Notify' => '1', 'Public' => '1'));
@@ -173,6 +176,7 @@ if ($SQL->GetWhere('ActivityType', array('Name' => 'AddonComment'))->NumRows() =
 // People mentioning others in addon comments
 if ($SQL->GetWhere('ActivityType', array('Name' => 'AddonCommentMention'))->NumRows() == 0)
    $SQL->Insert('ActivityType', array('AllowComments' => '0', 'Name' => 'AddonCommentMention', 'FullHeadline' => '%1$s mentioned %3$s in a %8$s.', 'ProfileHeadline' => '%1$s mentioned %3$s in a %8$s.', 'RouteCode' => 'comment', 'Notify' => '1', 'Public' => '0'));
+*/
 
 // People adding new language definitions
 if ($SQL->GetWhere('ActivityType', array('Name' => 'AddUserLanguage'))->NumRows() == 0)
@@ -198,7 +202,7 @@ $Construct->Table('UserLanguage')
    ->PrimaryKey('UserLanguageID')
    ->Column('UserID', 'int', FALSE, 'key')
    ->Column('LanguageID', 'int', FALSE, 'key')
-   ->Column('Owner', array('1', '0'), '0')
+   ->Column('Owner', 'tinyint(1)', '0')
    ->Column('CountTranslations', 'int', '0') // The number of translations this UserLanguage contains
    ->Column('CountDownloads', 'int', '0')
    ->Column('CountLikes', 'int', '0')
@@ -236,3 +240,62 @@ if ($SQL->GetWhere('Language', array('LanguageID' => 1))->NumRows() == 0)
 // Mark (UserID 1) owns the source translation
 if ($SQL->GetWhere('UserLanguage', array('LanguageID' => 1, 'UserID' => 1))->NumRows() == 0)
    $SQL->Insert('UserLanguage', array('LanguageID' => 1, 'UserID' => 1, 'Owner' => '1'));
+
+
+/*
+   Apr 26th, 2010
+   Changed all "enum" fields representing "bool" (0 or 1) to be tinyint.
+   For some reason mysql makes 0's "2" during this change. Change them back to "0".
+*/
+if (!$Construct->CaptureOnly) {
+	$SQL->Query("update GDN_AddonType set Visible = '0' where Visible = '2'");
+
+	$SQL->Query("update GDN_Addon set Visible = '0' where Visible = '2'");
+	$SQL->Query("update GDN_Addon set Vanilla2 = '0' where Vanilla2 = '2'");
+
+	$SQL->Query("update GDN_UserLanguage set Owner = '0' where Owner = '2'");
+}
+
+
+// Add AddonID column to discussion table for allowing discussions on addons.
+$Construct->Table('Discussion')
+   ->Column('AddonID', 'int', NULL)
+   ->Set();
+
+// Insert all of the existing comments into a new discussion for each addon
+if (!$Construct->CaptureOnly) {
+   if ($SQL->Query('select AddonCommentID from GDN_AddonComment')->NumRows() > 0) {
+      // Create discussions for addons with comments
+      $SQL->Query("insert into GDN_Discussion
+      (AddonID, InsertUserID, UpdateUserID, LastCommentID, Name, Body, Format,
+      CountComments, DateInserted, DateUpdated, DateLastComment, LastCommentUserID)
+      select distinct a.AddonID, a.InsertUserID, a.UpdateuserID, 0, a.Name, a.Name,
+      ac.Format, a.CountComments, a.DateInserted, a.DateUpdated, a.DateUpdated, 0
+      from GDN_Addon a join GDN_AddonComment ac on a.AddonID = ac.AddonID");
+
+      // Copy the comments across to the comment table
+      $SQL->Query("insert into GDN_Comment
+      (DiscussionID, InsertUserID, Body, Format, DateInserted)
+      select d.DiscussionID, ac.InsertUserID, ac.Body, ac.Format, ac.DateInserted
+      from GDN_Discussion d join GDN_AddonComment ac on d.AddonID = ac.AddonID");
+
+      // Update the LastCommentID
+      $SQL->Query("update GDN_Discussion d
+         join (
+           select DiscussionID, max(CommentID) as LastCommentID
+           from GDN_Comment
+           group by DiscussionID
+         ) c
+           on d.DiscussionID = c.DiscussionID
+         set d.LastCommentID = c.LastCommentID");
+      
+      // Update the LastCommentUserID
+      $SQL->Query("update GDN_Discussion d
+         join GDN_Comment c on d.LastCommentID = c.CommentID
+         set d.LastCommentUserID = c.InsertUserID");
+      
+      
+      // Delete the comments from the addon comments table
+      $SQL->Query('truncate table GDN_AddonComment');
+   }
+}

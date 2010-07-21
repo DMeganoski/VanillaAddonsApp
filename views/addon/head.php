@@ -17,7 +17,7 @@ if (!property_exists($this, 'HideSearch')) {
 		<strong>↳</strong>
 		<?php
 		$Suffix = $this->Sort.'/'.$this->Version.'/'.$Query;
-		echo Anchor('Show All Addons', 'addon/browse/all/'.$Suffix, $this->Filter == 'all' ? 'Active' : '');
+		echo Anchor('Show All Addons', 'addon/browse/all/'.$Suffix, 'ShowAll' . ($this->Filter == 'all' ? ' Active' : ''));
 		?>
 		or filter to
 		<?php
@@ -29,13 +29,12 @@ if (!property_exists($this, 'HideSearch')) {
 	<div class="Options">
 		<strong>↳</strong> Show addons for
 		<?php
-		$CssClass = $this->Version == '0' ? 'Active' : '';
-		echo Anchor('Both Vanilla Versions', $Url.$this->Sort.'/0/'.$Query, $CssClass);
-		echo ' or filter to ';
-		$CssClass = $this->Version == '1' ? 'Active' : '';
-		echo Anchor('Vanilla 1', $Url.$this->Sort.'/1/'.$Query, $CssClass);
+// $CssClass = $this->Version == '0' ? 'Active' : '';
+// echo Anchor('Both Vanilla Versions', $Url.$this->Sort.'/0/'.$Query, $CssClass);
 		$CssClass = $this->Version == '2' ? 'Active' : '';
 		echo Anchor('Vanilla 2', $Url.$this->Sort.'/2/'.$Query, $CssClass);
+		$CssClass = $this->Version == '1' ? 'Active' : '';
+		echo Anchor('Vanilla 1', $Url.$this->Sort.'/1/'.$Query, $CssClass);
 		?>
 	</div>
 	<div class="Options OrderOptions">

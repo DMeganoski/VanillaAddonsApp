@@ -52,37 +52,15 @@ class AddonController extends AddonsController {
             $this->View = 'NotFound';
          } else {
             $this->AddCssFile('popup.css');
-            // $this->AddCssFile('prettyPhoto.css');
             $this->AddCssFile('fancyzoom.css');
             $this->AddJsFile('fancyzoom.js');
    			$this->AddJsFile('/js/library/jquery.gardenmorepager.js');
             $this->AddJsFile('addon.js');
             $PictureModel = new Gdn_Model('AddonPicture');
             $this->PictureData = $PictureModel->GetWhere(array('AddonID' => $AddonID));
-            
-            $this->SetData('CommentData', $this->CommentData = $this->AddonCommentModel->Get($AddonID, $Limit, $this->Offset), TRUE);
-   
-            $PagerFactory = new PagerFactory();
-            $this->Pager = $PagerFactory->GetPager('Pager', $this);
-            $this->Pager->ClientID = 'Pager';
-            $this->Pager->Configure(
-               $this->Offset,
-               $Limit,
-               $this->Addon->CountComments,
-               'addon/'.$AddonID.'/'.Gdn_Format::Url($this->Addon->Name).'/%1$s/%2$s/'
-            );
-         
-            // Define the form for the comment input
-            $this->Form = Gdn::Factory('Form', 'Comment');
-            $this->Form->AddHidden('AddonID', $this->Addon->AddonID);
-            $this->Form->AddHidden('CommentID', '');
-            $this->Form->Action = Url('/addon/comment/');
-            
-            // Deliver json data if necessary
-            if ($this->_DeliveryType != DELIVERY_TYPE_ALL) {
-               $this->SetJson('LessRow', $this->Pager->ToString('less'));
-               $this->SetJson('MoreRow', $this->Pager->ToString('more'));
-            }
+				$DiscussionModel = new DiscussionModel();
+				$DiscussionModel->SQL->Where('AddonID', $AddonID);
+				$this->DiscussionData = $DiscussionModel->Get(0, 50);
             
             $this->View = 'addon';
 				$this->Title($this->Addon->Name.' '.$this->Addon->Version.' by '.$this->Addon->InsertName);
@@ -339,17 +317,20 @@ class AddonController extends AddonsController {
 				$Session->SetPreference('Addons.FilterVanilla', $VanillaVersion);
 			if ($Sort != '')
 				$Session->SetPreference('Addons.Sort', $Sort);
-		}
 			
-		$FilterToType = $Session->GetPreference('Addons.FilterType', 'all');
-		$VanillaVersion = $Session->GetPreference('Addons.FilterVanilla', '0');
-		$Sort = $Session->GetPreference('Addons.Sort', 'recent');
+			$FilterToType = $Session->GetPreference('Addons.FilterType', 'all');
+			$VanillaVersion = $Session->GetPreference('Addons.FilterVanilla', '2');
+			$Sort = $Session->GetPreference('Addons.Sort', 'recent');
+		}
+		
+		if (!in_array($FilterToType, array('all', 'plugins', 'applications', 'themes')))
+			$FilterToType = 'all';
 		
 		if ($Sort != 'popular')
 			$Sort = 'recent';
 		
-		if (!in_array($VanillaVersion, array('0', '1', '2')))
-			$VanillaVersion = '0';
+		if (!in_array($VanillaVersion, array('1', '2')))
+			$VanillaVersion = '2';
 		
 		$this->Version = $VanillaVersion;
 			
@@ -371,7 +352,7 @@ class AddonController extends AddonsController {
 		$NumResults = $this->AddonModel->GetCount(FALSE);
 		
 		// Build a pager
-		$PagerFactory = new PagerFactory();
+		$PagerFactory = new Gdn_PagerFactory();
 		$Pager = $PagerFactory->GetPager('Pager', $this);
 		$Pager->MoreCode = '›';
 		$Pager->LessCode = '‹';
@@ -464,9 +445,10 @@ class AddonController extends AddonsController {
             $AddonPictureModel = new Gdn_Model('AddonPicture');
             $AddonPictureID = $AddonPictureModel->Insert(array('AddonID' => $AddonID, 'File' => $ImageBaseName));
          }
+
          // If there were no problems, redirect back to the addon
-         if ($this->Form->ErrorCount() == 0)
-            Redirect('addon/'.$AddonID);
+         if ($this->Form->ErrorCount() == 0) 
+				Redirect('addon/'.$AddonID);
       }
       $this->Render();
    }
