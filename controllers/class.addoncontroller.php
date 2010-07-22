@@ -60,7 +60,7 @@ class AddonController extends AddonsController {
             $PictureModel = new Gdn_Model('AddonPicture');
             $this->PictureData = $PictureModel->GetWhere(array('AddonID' => $AddonID));
 				$DiscussionModel = new DiscussionModel();
-				$DiscussionModel->SQL->Where('AddonID', $AddonID);
+				$DiscussionModel->AddonID = $AddonID; // Let the model know we want to filter to a particular addon (we then hook into the model in the addons hooks file).
 				$this->DiscussionData = $DiscussionModel->Get(0, 50);
             
             $this->View = 'addon';
@@ -361,7 +361,7 @@ class AddonController extends AddonsController {
 			$Offset,
 			$Limit,
 			$NumResults,
-			'addon/browse/'.$FilterToType.'/'.$Sort.'/'.$this->Version.'/p%1$s/?Form/Keywords='.Gdn_Format::Url($Search)
+			'addon/browse/'.$FilterToType.'/'.$Sort.'/'.$this->Version.'/%1$s/?Form/Keywords='.Gdn_Format::Url($Search)
 		);
 		$this->SetData('Pager', $Pager, TRUE);
       

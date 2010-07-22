@@ -19,13 +19,18 @@
 	<h4>What is this stuff?</h4>
 	<p>Addons are custom features that you can add to your Vanilla forum. Addons are created by our community of developers and people like you!</p>
 </div>
+<div class="Box Work">
+	<h4>Will it work on my Vanilla Forum?</h4>
+	<p>These addons are for people who downloaded and set up their own Vanilla forum. Compare your downloaded version with the version requirements on the right.</p>
+	<p>If your Vanilla forum is hosted at <a href="http://vanillaforums.com">VanillaForums.com</a>, this addon may already be installed there.</p>
+</div>
 	
 <div class="Box Approved">
 	<h4>Vanilla Approved?</h4>
 	<p>We review addons to make sure they are safe and don't cause bugs. An addon is considered to be "Vanilla Approved" once our review process is complete.</p>
 </div>
 
-<div class="Box">
+<div class="Box DownloadPanelBox">
 	<h4>Don't have Vanilla yet?</h4>
-	<?php echo Anchor('Download Vanilla Now', '/download', 'GreenButton BigButton'); ?>
+	<?php echo Anchor('Get Vanilla Now', '/download', 'BigButton'); ?>
 </div>

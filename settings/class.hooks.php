@@ -14,6 +14,13 @@ class AddonsHooks implements Gdn_IPlugin {
       // Do something
    }
    
+   // Filter discussion list to a particular addonid if it is present on the model (I add it to the model manually before running the Get() method in the AddonController.
+   public function DiscussionModel_BeforeGet_Handler($Sender) {
+      $AddonID = GetValue('AddonID', $Sender);
+      if (is_numeric($AddonID) && $AddonID > 0)
+         $Sender->SQL->Where('AddonID', $AddonID);
+   }
+   
    // Write information about addons to the discussion if it is related to an addon
    public function DiscussionController_BeforeCommentBody_Handler($Sender) {
       $Discussion = GetValue('Object', $Sender->EventArguments);
