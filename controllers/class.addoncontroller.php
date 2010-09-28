@@ -17,6 +17,11 @@ class AddonController extends AddonsController {
 	public $Filter = 'all';
 	public $Sort = 'recent';
 	public $Version = '0'; // The version of Vanilla to filter to (0 is no filter)
+
+   /**
+    * @var AddonModel
+    */
+   public $AddonModel;
    
    public function Initialize() {
       parent::Initialize();
@@ -29,10 +34,6 @@ class AddonController extends AddonsController {
          $this->AddJsFile('global.js');
       }
    }
-   
-   public function NotFound() {
-      $this->Render();
-   }
 
 
    /**
@@ -40,6 +41,7 @@ class AddonController extends AddonsController {
     */
    public function Index($AddonID = '', $AddonName = '', $Page = '') {
       list($Offset, $Limit) = OffsetLimit($Page, Gdn::Config('Garden.Search.PerPage', 20));
+
       if ($AddonID != '') {
          if (!is_numeric($Limit) || $Limit < 0)
             $Limit = 50;
@@ -65,6 +67,9 @@ class AddonController extends AddonsController {
             
             $this->View = 'addon';
 				$this->Title($this->Addon->Name.' '.$this->Addon->Version.' by '.$this->Addon->InsertName);
+
+            // Set the canonical url.
+            $this->CanonicalUrl(Url("/addon/{$this->Addon->AddonID}/".Gdn_Format::Url($this->Addon->Name), TRUE));
          }
       } else {
 			$this->View = 'browse';
@@ -82,11 +87,61 @@ class AddonController extends AddonsController {
   		$this->AddModule('AddonHelpModule');
 		$this->Render();
    }
+
+   public function Add() {
+      $this->Permission('Addons.Addon.Add');
+      $this->AddJsFile('/js/library/jquery.autogrow.js');
+      $this->AddJsFile('forms.js');
+
+      $this->Form->SetModel($this->AddonModel);
+
+      if ($this->Form->AuthenticatedPostBack()) {
+         $Upload = new Gdn_Upload();
+         $Upload->AllowFileExtension(NULL);
+         $Upload->AllowFileExtension('zip');
+         try {
+            // Validate the upload
+            $TmpFile = $Upload->ValidateUpload('File');
+            $Extension = pathinfo($Upload->GetUploadedFileName(), PATHINFO_EXTENSION);
+
+            // Generate the target file name
+            $TargetFile = $Upload->GenerateTargetName(PATH_ROOT . DS . 'uploads', $Extension);
+            $FileBaseName = pathinfo($TargetFile, PATHINFO_BASENAME);
+
+            // Save the uploaded file
+            $Upload->SaveAs(
+               $TmpFile,
+               $TargetFile
+            );
+            $this->Form->SetFormValue('Path', $TargetFile);
+         } catch (Exception $ex) {
+            $this->Form->AddError($ex->getMessage());
+            if (file_exists($TargetFile))
+               unlink($TargetFile);
+         }
+
+         // If there were no errors, save the addon
+         if ($this->Form->ErrorCount() == 0) {
+            // Set some additional values to save.
+            $this->Form->SetFormValue('Vanilla2', TRUE);
+
+            // Save the addon
+            $AddonID = $this->Form->Save();
+            if ($AddonID !== FALSE) {
+               // Redirect to the new addon
+               $Name = $this->Form->GetFormValue('Name', '');
+               Redirect("addon/$AddonID/".Gdn_Format::Url($Name));
+            }
+         }
+      }
+
+      $this->Render();
+   }
    
    /**
-    * Add a new addon
+    * Backup version of add for Vanilla 1 addons.
     */
-   public function Add() {
+   public function AddV1() {
 		$this->Permission('Addons.Addon.Add');
 		$this->AddJsFile('/js/library/jquery.autogrow.js');
 		$this->AddJsFile('forms.js');
@@ -97,6 +152,8 @@ class AddonController extends AddonsController {
       
       if ($this->Form->AuthenticatedPostBack()) {
          $Upload = new Gdn_Upload();
+         $Upload->AllowFileExtension(NULL);
+         $Upload->AllowFileExtension('zip');
          try {
             // Validate the upload
             $TmpFile = $Upload->ValidateUpload('File');
@@ -109,9 +166,8 @@ class AddonController extends AddonsController {
             // Save the uploaded file
             $Upload->SaveAs(
                $TmpFile,
-               PATH_ROOT . DS . 'uploads' . DS . $FileBaseName
+               $TargetFile
             );
-
          } catch (Exception $ex) {
             $this->Form->AddError($ex->getMessage());
          }
@@ -125,12 +181,107 @@ class AddonController extends AddonsController {
                Redirect('addon/'.$AddonID.'/'.Gdn_Format::Url($Name));
             }
          }
+      } else {
+         $this->Form->SetFormValue('Vanilla2', TRUE);
       }
       $this->Render();      
    }
-   
+
+   public function Check($AddonID, $SaveVersionID = FALSE) {
+      $this->Permission('Addons.Addon.Manage');
+
+      if ($SaveVersionID !== FALSE) {
+         // Get the version data.
+         $Version = $this->AddonModel->SQL->GetWhere('AddonVersion', array('AddonVersionID' => $SaveVersionID))->FirstRow(DATASET_TYPE_ARRAY);
+         $this->AddonModel->Save($Version);
+         $this->Form->SetValidationResults($this->AddonModel->ValidationResults());
+      }
+
+      $Addon = $this->AddonModel->GetID($AddonID, TRUE);
+      $AddonTypes = Gdn::SQL()->Get('AddonType')->ResultArray();
+      $AddonTypes = Gdn_DataSet::Index($AddonTypes, 'AddonTypeID');
+
+      if (!$Addon)
+         throw NotFoundException('Addon');
+
+      // Get the data for the most recent version of the addon.
+      $Path = PATH_ROOT."/uploads/{$Addon->File}";
+      
+      $AddonData = ArrayTranslate((array)$Addon, array('AddonID', 'AddonKey', 'Name', 'Type', 'Description', 'Requirements', 'Checked'));
+      $FileAddonData = $this->AddonModel->AnalyzeFile($Path);
+      if ($FileAddonData) {
+         $AddonData = array_merge($AddonData, ArrayTranslate($FileAddonData, array('AddonKey' => 'File_AddonKey', 'Name' => 'File_Name', 'File_Type', 'Description' => 'File_Description', 'Requirements' => 'File_Requirements', 'Checked' => 'File_Checked')));
+         $AddonData['File_Type'] = GetValueR($FileAddonData['AddonTypeID'].'.Label', $AddonTypes, 'Unknown');
+      }
+      $this->SetData('Addon', $AddonData);
+
+      // Go through the versions and make sure we get the versions to check out.
+      $Versions = array();
+      foreach ($Addon->Versions as $Version) {
+         $Version = $Version;
+         $Path = PATH_ROOT."/uploads/{$Version->File}";
+         $FileVersionData = $this->AddonModel->AnalyzeFile($Path);
+         
+         $VersionData = ArrayTranslate((array)$Version, array('AddonVersionID', 'Version', 'MD5', 'Checked'));
+         $FileVersionData = ArrayTranslate($FileVersionData, array('Version' => 'File_Version', 'MD5' => 'File_MD5', 'Checked' => 'File_Checked'));
+         $Versions[] = array_merge($VersionData, $FileVersionData);
+      }
+      $this->SetData('Versions', $Versions);
+
+      $this->AddModule('AddonHelpModule');
+      $this->Render();
+   }
+
+   public function DeleteVersion($VersionID) {
+      $this->Permission('Addons.Addon.Manage');
+      $Version = $this->AddonModel->GetVersion($VersionID);
+      $this->Data = $Version;
+
+      if ($this->Form->AuthenticatedPostBack() && $this->Form->GetFormValue('Yes')) {
+         $this->AddonModel->DeleteVersion($VersionID);
+
+         // Update the current version of the addon.
+         $AddonID = GetValue('AddonID', $Version);
+         $this->AddonModel->UpdateCurrentVersion($AddonID);
+         $this->RedirectUrl = Url('/addon/check/'.$AddonID);
+      }
+      $this->Render();
+   }
+
    public function Edit($AddonID = '') {
 		$this->Permission('Addons.Addon.Add');
+
+		$this->AddJsFile('/js/library/jquery.autogrow.js');
+		$this->AddJsFile('forms.js');
+
+		$Session = Gdn::Session();
+      $Addon = $this->AddonModel->GetID($AddonID);
+      if (!$Addon)
+         throw NotFoundException('Addon');
+
+      if ($Addon->InsertUserID != $Session->UserID)
+         $this->Permission('Addons.Addon.Manage');
+
+      $this->Form->SetModel($this->AddonModel);
+      $this->Form->AddHidden('AddonID', $AddonID);
+      $AddonTypeModel = new Gdn_Model('AddonType');
+      $this->TypeData = $AddonTypeModel->GetWhere(array('Visible' => '1'));
+
+      if ($this->Form->AuthenticatedPostBack() === FALSE) {
+         $this->Form->SetData($Addon);
+      } else {
+         if ($this->Form->Save() !== FALSE) {
+            $Addon = $this->AddonModel->GetID($AddonID);
+            $this->StatusMessage = T("Your changes have been saved successfully.");
+            $this->RedirectUrl = Url('/addon/'.$AddonID.'/'.Gdn_Format::Url($Addon->Name));
+         }
+      }
+
+      $this->Render();
+   }
+   
+   public function EditV1($AddonID = '') {
+		$this->Permission('Addons.Addon.Manage');
 		
 		$this->AddJsFile('/js/library/jquery.autogrow.js');
 		$this->AddJsFile('forms.js');
@@ -170,29 +321,29 @@ class AddonController extends AddonsController {
       if ($Addon->InsertUserID != $Session->UserID)
          $this->Permission('Addons.Addon.Manage');
 
-      $AddonVersionModel = new Gdn_Model('AddonVersion');
-      $this->Form->SetModel($AddonVersionModel);
+      $this->Form->SetModel($this->AddonModel);
       $this->Form->AddHidden('AddonID', $AddonID);
       
       if ($this->Form->AuthenticatedPostBack()) {
          $Upload = new Gdn_Upload();
+         $Upload->AllowFileExtension(NULL);
+         $Upload->AllowFileExtension('zip');
          try {
             // Validate the upload
             $TmpFile = $Upload->ValidateUpload('File');
             $Extension = pathinfo($Upload->GetUploadedFileName(), PATHINFO_EXTENSION);
             
             // Generate the target name
-            $TargetFile = $Upload->GenerateTargetName(PATH_ROOT . DS . 'uploads', $Extension);
+            $TargetFile = $Upload->GenerateTargetName(PATH_ROOT . DS . 'uploads/addons', $Extension);
             $FileBaseName = pathinfo($TargetFile, PATHINFO_BASENAME);
             
             // Save the uploaded file
             $Upload->SaveAs(
                $TmpFile,
-               PATH_ROOT . DS . 'uploads' . DS . $FileBaseName
+               $TargetFile
             );
-            $this->Form->SetFormValue('File', $FileBaseName);
-				$this->Form->SetFormValue('TestedWith', 'Blank');
-
+            $this->Form->SetFormValue('Path', $TargetFile);
+//				$this->Form->SetFormValue('TestedWith', 'Blank');
          } catch (Exception $ex) {
             $this->Form->AddError($ex->getMessage());
          }
@@ -201,14 +352,18 @@ class AddonController extends AddonsController {
          if ($this->Form->ErrorCount() == 0) {
             $NewVersionID = $this->Form->Save();
             if ($NewVersionID) {
-               $this->AddonModel->Save(array('AddonID' => $AddonID, 'CurrentAddonVersionID' => $NewVersionID));
+               $this->AddonModel->UpdateCurrentVersion($AddonID);
                $this->StatusMessage = T("New version saved successfully.");
                $this->RedirectUrl = Url('/addon/'.$AddonID.'/'.Gdn_Format::Url($Addon->Name));
             }
          }
       }
       $this->Render();      
-   }   
+   }
+
+   public function NotFound() {
+      $this->Render();
+   }
    
    public function Approve($AddonID = '') {
       $this->Permission('Addons.Addon.Manage');

@@ -17,8 +17,9 @@ if (!isset($Drop))
 if (!isset($Explicit))
    $Explicit = TRUE;
    
-$SQL = $Database->SQL();
-$Construct = $Database->Structure();
+$SQL = Gdn::SQL();
+$Construct = Gdn::Structure();
+$Px = $Construct->DatabasePrefix();
 
 $Construct->Table('AddonType')
    ->PrimaryKey('AddonTypeID')
@@ -34,15 +35,19 @@ if ($SQL->Select()->From('AddonType')->Get()->NumRows() == 0) {
    $SQL->Insert('AddonType', array('Label' => 'Application', 'Visible' => '1'));
 }
 
-$Construct->Table('Addon')
-   ->PrimaryKey('AddonID')
+$Construct->Table('Addon');
+$Description2Exists = $Construct->ColumnExists('Description2');
+
+$Construct->PrimaryKey('AddonID')
    ->Column('CurrentAddonVersionID', 'int', TRUE, 'key')
+   ->Column('AddonKey', 'varchar(50)', NULL, 'index')
    ->Column('AddonTypeID', 'int', FALSE, 'key')
    ->Column('InsertUserID', 'int', FALSE, 'key')
    ->Column('UpdateUserID', 'int', TRUE)
    ->Column('Name', 'varchar(100)')
    ->Column('Icon', 'varchar(200)', TRUE)
    ->Column('Description', 'text', TRUE)
+   ->Column('Description2', 'text', NULL)
    ->Column('Requirements', 'text', TRUE)
    ->Column('CountComments', 'int', '0')
    ->Column('CountDownloads', 'int', '0')
@@ -50,7 +55,12 @@ $Construct->Table('Addon')
    ->Column('Vanilla2', 'tinyint(1)', '1')
    ->Column('DateInserted', 'datetime')
    ->Column('DateUpdated', 'datetime', TRUE)
+   ->Column('Checked', 'tinyint(1)', '0')
    ->Set($Explicit, $Drop);
+
+if (!$Description2Exists) {
+   $Construct->Query("update {$Px}Addon set Description2 = Description where Checked = 0");
+}
 
 /*
 $Construct->Table('AddonComment')
@@ -68,10 +78,13 @@ $Construct->Table('AddonVersion')
    ->Column('AddonID', 'int', FALSE, 'key')
    ->Column('File', 'varchar(200)', TRUE)
    ->Column('Version', 'varchar(20)')
-   ->Column('TestedWith', 'text')
+   ->Column('TestedWith', 'text', NULL)
+   ->Column('MD5', 'varchar(32)')
    ->Column('InsertUserID', 'int', FALSE, 'key')
    ->Column('DateInserted', 'datetime')
    ->Column('DateReviewed', 'datetime', TRUE)
+   ->Column('Checked', 'tinyint(1)', '0')
+   ->Column('Deleted', 'tinyint(1)', '0')
    ->Set($Explicit, $Drop);
 
 $Construct->Table('AddonPicture')

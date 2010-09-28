@@ -22,6 +22,8 @@ if ($this->DeliveryType() == DELIVERY_TYPE_ALL) {
 		echo '|'.Anchor('Upload New Version', '/addon/newversion/'.$this->Addon->AddonID, 'Popup');
 		echo '|'.Anchor('Upload Screen', '/addon/addpicture/'.$this->Addon->AddonID, 'Popup');
 		echo '|'.Anchor('Upload Icon', '/addon/icon/'.$this->Addon->AddonID, 'Popup');
+      if ($Session->CheckPermission('Addons.Addon.Manage'))
+         echo '|'.Anchor('Check', '/addon/check/'.$this->Addon->AddonID);
 		if ($Session->CheckPermission('Addons.Addon.Approve'))
 			echo '|'.Anchor($this->Addon->DateReviewed == '' ? 'Approve Version' : 'Unapprove Version', '/addon/approve/'.$this->Addon->AddonID, 'ApproveAddon');
 		
@@ -50,18 +52,26 @@ if ($this->DeliveryType() == DELIVERY_TYPE_ALL) {
 				</dl>
 			</div>
 			<div class="Box RequirementBox">
+            <h3><?php echo T('Requirements') ?></h3>
 				<dl>
-					<dt>Requires</dt>
+					<dt>Vanilla</dt>
 					<dd><span class="Vanilla<?php echo $VanillaVersion; ?>">Vanilla <?php echo $VanillaVersion; ?></span></dd>
 				</dl>
 				<?php
-				$OtherRequirements = Gdn_Format::Display($this->Addon->Requirements);
-				if (!StringIsNullOrEmpty($OtherRequirements)) {
-					?>
-					<p>Other Requirements:</p>
-					<?php
-					echo $OtherRequirements;
-				}
+            if (!$this->Addon->Checked) {
+               $OtherRequirements = Gdn_Format::Display($this->Addon->Requirements);
+               if ($OtherRequirements) {
+                  ?>
+                  <p>Other Requirements:</p>
+                  <?php
+                  echo $OtherRequirements;
+               }
+            } else {
+               $OtherRequirements = Gdn_Format::Html($this->Addon->Requirements);
+               if ($OtherRequirements) {
+                  echo $OtherRequirements;
+               }
+            }
 				?>
 			</div>
 		</div>
@@ -70,6 +80,9 @@ if ($this->DeliveryType() == DELIVERY_TYPE_ALL) {
 		echo '<img class="Icon" src="'.Url('uploads/ai'.$this->Addon->Icon).'" />';
 		
 	echo Gdn_Format::Html($this->Addon->Description);
+   if ($this->Addon->Description2) {
+      echo '<br /><br />', Gdn_Format::Html($this->Addon->Description2);
+   }
 	?>
 	</div>
 	<?php

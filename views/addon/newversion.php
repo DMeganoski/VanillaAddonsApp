@@ -16,18 +16,18 @@ echo $this->Form->Errors();
 		<?php echo $this->Form->Label('File to Upload (2mb max)', 'File'); ?>
 		<?php echo $this->Form->Input('File', 'file', array('class' => 'File')); ?>
 	</li>
-	<li>
+	<!--<li>
 		<?php
-			echo $this->Form->Label('New Version Number', 'Version');
-			echo $this->Form->TextBox('Version');
+//			echo $this->Form->Label('New Version Number', 'Version');
+//			echo $this->Form->TextBox('Version');
 		?>
-	</li>
+	</li>-->
 	<!--
 	<li>
 		<div class="Info"><?php echo T('Specify which versions you have tested the new version of your addon with: PHP, MySQL, jQuery, etc'); ?></div>
 		<?php
-			echo $this->Form->Label('Testing Information', 'TestedWith');
-			echo $this->Form->TextBox('TestedWith', array('multiline' => TRUE));
+//			echo $this->Form->Label('Testing Information', 'TestedWith');
+//			echo $this->Form->TextBox('TestedWith', array('multiline' => TRUE));
 		?>
 	</li>
 	-->

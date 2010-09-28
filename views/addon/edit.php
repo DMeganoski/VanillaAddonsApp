@@ -2,7 +2,7 @@
 $this->HideSearch = TRUE;
 if ($this->DeliveryType() == DELIVERY_TYPE_ALL)
 	echo $this->FetchView('head');
-   
+
 ?>
 <h1><?php echo T('Edit Addon'); ?></h1>
 <?php
@@ -12,39 +12,9 @@ echo $this->Form->Errors();
 <ul>
 	<li>
 		<?php
-			echo $this->Form->CheckBox('Vanilla2', 'This Addon is for Vanilla 2', array('value' => '1'));
-		?>
-	</li>
-	<li>
-		<?php
-			echo $this->Form->Label('Type of Addon', 'AddonTypeID');
-			echo $this->Form->DropDown(
-				'AddonTypeID',
-				$this->TypeData,
-				array(
-					'ValueField' => 'AddonTypeID',
-					'TextField' => 'Label',
-					'IncludeNull' => TRUE
-				));
-		?>
-	</li>
-	<li>
-		<?php
-			echo $this->Form->Label('Name', 'Name');
-			echo $this->Form->TextBox('Name');
-		?>
-	</li>
-	<li>
-		<?php
-			echo $this->Form->Label('Description', 'Description');
-			echo $this->Form->TextBox('Description', array('multiline' => TRUE));
-		?>
-	</li>
-	<li>
-		<div class="Info"><?php echo T('Specify any requirements your addon has, including: php version, mysql version, jquery version, browser & version, etc'); ?></div>
-		<?php
-			echo $this->Form->Label('Requirements', 'Requirements');
-			echo $this->Form->TextBox('Requirements', array('multiline' => TRUE));
+			echo '<h3>', $this->Form->Label('Additional Description', 'Description2'), '</h3>';
+         echo '<div class="Info">', T('Additional Description', 'Your addon file should contain a basic description in it\'s info array. Add an additional, more detailed description here. Html allowed.'), '</div>';
+			echo $this->Form->TextBox('Description2', array('multiline' => TRUE));
 		?>
 	</li>
 </ul>
