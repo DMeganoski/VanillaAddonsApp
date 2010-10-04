@@ -46,11 +46,13 @@ class AddonController extends AddonsController {
          } else {
             $AddonID = $Addon['AddonID'];
             $this->SetData($Addon);
+            $this->AddCssFile('plugins/Voting/design/voting.css');
             $this->AddCssFile('popup.css');
             $this->AddCssFile('fancyzoom.css');
             $this->AddJsFile('fancyzoom.js');
    			$this->AddJsFile('/js/library/jquery.gardenmorepager.js');
             $this->AddJsFile('addon.js');
+            $this->AddJsFile('plugins/Voting/voting.js');
             $PictureModel = new Gdn_Model('AddonPicture');
             $this->PictureData = $PictureModel->GetWhere(array('AddonID' => $AddonID));
 				$DiscussionModel = new DiscussionModel();
