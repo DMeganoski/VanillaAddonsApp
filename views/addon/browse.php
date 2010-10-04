@@ -17,11 +17,11 @@ if ($this->DeliveryType() == DELIVERY_TYPE_ALL) {
    ?></h2>
    <ul class="DataList Addons">
       <?php
-      if ($this->SearchResults->NumRows() == 0)
+      if ($this->Data('Addons')->NumRows() == 0)
          echo '<li class="Empty">There were no addons matching your search criteria.</li>';
 }            
 $Alt = '';
-foreach ($this->SearchResults->Result() as $Addon) {
+foreach ($this->Data('Addons')->Result() as $Addon) {
    $Alt = $Alt == ' Alt' ? '' : ' Alt';
    WriteAddon($Addon, $Alt);
 }
@@ -29,5 +29,5 @@ if ($this->DeliveryType() == DELIVERY_TYPE_ALL) {
 ?>
    </ul>
    <?php
-   echo $this->Pager->ToString('more');
+   echo $this->Data('_Pager')->ToString('more');
 }

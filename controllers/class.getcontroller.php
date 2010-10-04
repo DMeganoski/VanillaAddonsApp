@@ -15,32 +15,49 @@ class GetController extends AddonsController {
    
    public $Uses = array('Form', 'Database', 'AddonModel');
 	
-   public function Index($AddonID = '', $ServeFile = '0') {
+   public function Index($ID = '', $ServeFile = '0') {
 		$this->AddJsFile('js/library/jquery.js');
-		if ($ServeFile != '1')
-			$this->AddJsFile('get.js');
 
-		// Define the item being downloaded
-		if (strtolower($AddonID) == 'vanilla')
-			$AddonID = 465;
-			
+      // Define the item being downloaded
+		if (strtolower($ID) == 'vanilla')
+			$ID = 'vanilla-core';
+
+      $Ext = strtolower(strrchr($ID, '.'));
+      if ($Ext == '.zip') {
+         $ServeFile = '1';
+         $ID = substr($ID, 0, -4);
+      }
+
 		// Find the requested addon
-		$this->Addon = $this->AddonModel->GetID($AddonID);
-		if (!is_object($this->Addon)) {
-			$this->Addon = new stdClass();
-			$this->Addon->Name = 'Not Found';
-			$this->Addon->Version = 'undefined';
-			$this->Addon->File = '';
+		$this->Addon = $this->AddonModel->GetSlug($ID);
+		
+		if (!is_array($this->Addon) || !GetValue('File', $this->Addon)) {
+			$this->Addon = array(
+            'Name' => 'Not Found',
+            'Version' => 'undefined',
+            'File' => '');
 		} else {
+         $AddonID = $this->Addon['AddonID'];
+         if ($ServeFile != '1')
+            $this->AddJsFile('get.js');
+         
 			if ($ServeFile == '1') {
 				// Record this download
 				$this->Database->SQL()->Insert('Download', array(
-					'AddonID' => $this->Addon->AddonID,
+					'AddonID' => $AddonID,
 					'DateInserted' => Gdn_Format::ToDateTime(),
 					'RemoteIp' => @$_SERVER['REMOTE_ADDR']
 				));
-				$this->AddonModel->SetProperty($this->Addon->AddonID, 'CountDownloads', $this->Addon->CountDownloads + 1);
-				Gdn_FileSystem::ServeFile('uploads/'.$this->Addon->File, Gdn_Format::Url($this->Addon->Name.'-'.$this->Addon->Version));
+				$this->AddonModel->SetProperty($AddonID, 'CountDownloads', $this->Addon['CountDownloads'] + 1);
+
+            if ($this->Addon['Slug'])
+               $Filename = $this->Addon['Slug'];
+            else
+               $Filename = "{$this->Addon['Name']}-{$this->Addon['Version']}";
+
+            $Filename = Gdn_Format::Url($Filename);
+
+				Gdn_FileSystem::ServeFile('uploads/'.$this->Addon['File'], $Filename);
 			}
 		}
 		

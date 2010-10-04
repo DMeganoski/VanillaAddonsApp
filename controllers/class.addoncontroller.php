@@ -35,25 +35,17 @@ class AddonController extends AddonsController {
       }
    }
 
-
    /**
     * Home Page
     */
-   public function Index($AddonID = '', $AddonName = '', $Page = '') {
-      list($Offset, $Limit) = OffsetLimit($Page, Gdn::Config('Garden.Search.PerPage', 20));
-
-      if ($AddonID != '') {
-         if (!is_numeric($Limit) || $Limit < 0)
-            $Limit = 50;
-         
-         $this->Offset = $Offset;   
-         if ($this->Offset < 0)
-            $this->Offset = 0;
-         
-         $this->Addon = $this->AddonModel->GetID($AddonID);
-         if (!is_object($this->Addon)) {
+   public function Index($ID) {
+      if ($ID != '') {
+         $Addon = $this->AddonModel->GetSlug($ID, TRUE);
+         if (!is_array($Addon)) {
             $this->View = 'NotFound';
          } else {
+            $AddonID = $Addon['AddonID'];
+            $this->SetData($Addon);
             $this->AddCssFile('popup.css');
             $this->AddCssFile('fancyzoom.css');
             $this->AddJsFile('fancyzoom.js');
@@ -66,10 +58,14 @@ class AddonController extends AddonsController {
 				$this->DiscussionData = $DiscussionModel->Get(0, 50);
             
             $this->View = 'addon';
-				$this->Title($this->Addon->Name.' '.$this->Addon->Version.' by '.$this->Addon->InsertName);
+				$this->Title($this->Data('Name').' '.$this->Data('Version').' by '.$this->Data('InsertName'));
 
             // Set the canonical url.
-            $this->CanonicalUrl(Url("/addon/{$this->Addon->AddonID}/".Gdn_Format::Url($this->Addon->Name), TRUE));
+            if ($this->Data('Slug')) {
+               $this->CanonicalUrl(Url("/addon/{$this->Data['Slug']}", TRUE));
+            } else {
+               $this->CanonicalUrl(Url("/addon/{$this->Data['AddonID']}/".Gdn_Format::Url($this->Data('Name')), TRUE));
+            }
          }
       } else {
 			$this->View = 'browse';
@@ -85,6 +81,9 @@ class AddonController extends AddonsController {
 		*/
       }
   		$this->AddModule('AddonHelpModule');
+      $this->SetData('_Types', AddonModel::$Types);
+      $this->SetData('_TypesPlural', AddonModel::$TypesPlural);
+      
 		$this->Render();
    }
 
@@ -105,7 +104,7 @@ class AddonController extends AddonsController {
             $Extension = pathinfo($Upload->GetUploadedFileName(), PATHINFO_EXTENSION);
 
             // Generate the target file name
-            $TargetFile = $Upload->GenerateTargetName(PATH_ROOT . DS . 'uploads', $Extension);
+            $TargetFile = $Upload->GenerateTargetName(PATH_ROOT . DS . 'uploads/addons', $Extension);
             $FileBaseName = pathinfo($TargetFile, PATHINFO_BASENAME);
 
             // Save the uploaded file
@@ -116,8 +115,6 @@ class AddonController extends AddonsController {
             $this->Form->SetFormValue('Path', $TargetFile);
          } catch (Exception $ex) {
             $this->Form->AddError($ex->getMessage());
-            if (file_exists($TargetFile))
-               unlink($TargetFile);
          }
 
          // If there were no errors, save the addon
@@ -132,6 +129,9 @@ class AddonController extends AddonsController {
                $Name = $this->Form->GetFormValue('Name', '');
                Redirect("addon/$AddonID/".Gdn_Format::Url($Name));
             }
+         } else {
+            if (isset($TargetFile) && file_exists($TargetFile))
+               unlink($TargetFile);
          }
       }
 
@@ -148,7 +148,7 @@ class AddonController extends AddonsController {
       
       $this->Form->SetModel($this->AddonModel);
       $AddonTypeModel = new Gdn_Model('AddonType');
-      $this->TypeData = $AddonTypeModel->GetWhere(array('Visible' => '1'));
+      $this->TypeData = $AddonTypeModel->GetWhere(array('Visible' => '1', 'Label <>' => 'Core'));
       
       if ($this->Form->AuthenticatedPostBack()) {
          $Upload = new Gdn_Upload();
@@ -160,7 +160,7 @@ class AddonController extends AddonsController {
             $Extension = pathinfo($Upload->GetUploadedFileName(), PATHINFO_EXTENSION);
             
             // Generate the target file name
-            $TargetFile = $Upload->GenerateTargetName(PATH_ROOT . DS . 'uploads', $Extension);
+            $TargetFile = $Upload->GenerateTargetName(PATH_ROOT . DS . 'uploads/addons', $Extension);
             $FileBaseName = pathinfo($TargetFile, PATHINFO_BASENAME);
             
             // Save the uploaded file
@@ -174,15 +174,19 @@ class AddonController extends AddonsController {
          // If there were no errors, save the addon
          if ($this->Form->ErrorCount() == 0) {
             // Save the addon
-            $AddonID = $this->Form->Save($FileBaseName);
+            $this->Form->SetFormValue('File', "addons/$FileBaseName");
+            $this->Form->SetFormValue('Vanilla2', FALSE);
+            $AddonID = $this->Form->Save(TRUE);
             if ($AddonID !== FALSE) {
                // Redirect to the new addon
                $Name = $this->Form->GetFormValue('Name', '');
                Redirect('addon/'.$AddonID.'/'.Gdn_Format::Url($Name));
+            } else {
+               // Delete an erroneous file.
+               if (file_exists($TargetFile))
+                  unlink($TargetFile);
             }
          }
-      } else {
-         $this->Form->SetFormValue('Vanilla2', TRUE);
       }
       $this->Render();      
    }
@@ -302,7 +306,7 @@ class AddonController extends AddonsController {
       if ($this->Form->AuthenticatedPostBack() === FALSE) {
          $this->Form->SetData($Addon);
       } else {
-         if ($this->Form->Save() !== FALSE) {
+         if ($this->Form->Save(TRUE) !== FALSE) {
             $Addon = $this->AddonModel->GetID($AddonID);
             $this->StatusMessage = T("Your changes have been saved successfully.");
             $this->RedirectUrl = Url('/addon/'.$AddonID.'/'.Gdn_Format::Url($Addon->Name));
@@ -311,8 +315,12 @@ class AddonController extends AddonsController {
       
       $this->Render();
    }
-   
+
    public function NewVersion($AddonID = '') {
+      $this->_NewVersion($AddonID);
+   }
+   
+   protected function _NewVersion($AddonID = '', $V1 = FALSE) {
 		$Session = Gdn::Session();
       $Addon = $this->AddonModel->GetID($AddonID);
       if (!$Addon)
@@ -350,15 +358,22 @@ class AddonController extends AddonsController {
          
          // If there were no errors, save the addonversion
          if ($this->Form->ErrorCount() == 0) {
-            $NewVersionID = $this->Form->Save();
+            $NewVersionID = $this->Form->Save($V1);
             if ($NewVersionID) {
                $this->AddonModel->UpdateCurrentVersion($AddonID);
                $this->StatusMessage = T("New version saved successfully.");
                $this->RedirectUrl = Url('/addon/'.$AddonID.'/'.Gdn_Format::Url($Addon->Name));
+            } else {
+               if (file_exists($TargetFile))
+                  unlink($TargetFile);
             }
          }
       }
       $this->Render();      
+   }
+
+   public function NewVersionV1($AddonID = '') {
+      $this->_NewVersion($AddonID, TRUE);
    }
 
    public function NotFound() {
@@ -479,7 +494,7 @@ class AddonController extends AddonsController {
 			$Sort = $Session->GetPreference('Addons.Sort', 'recent');
 		}
 		
-		if (!in_array($FilterToType, array('all', 'plugins', 'applications', 'themes')))
+		if (!array_key_exists($FilterToType, AddonModel::$TypesPlural))
 			$FilterToType = 'all';
 		
 		if ($Sort != 'popular')
@@ -502,7 +517,7 @@ class AddonController extends AddonsController {
 				
 		$SortField = $Sort == 'recent' ? 'DateUpdated' : 'CountDownloads';
 		$ResultSet = $this->AddonModel->GetWhere(FALSE, $SortField, 'desc', $Limit, $Offset);
-		$this->SetData('SearchResults', $ResultSet, TRUE);
+		$this->SetData('Addons', $ResultSet);
 		$this->_BuildBrowseWheres($Search);
 		$NumResults = $this->AddonModel->GetCount(FALSE);
 		
@@ -518,7 +533,7 @@ class AddonController extends AddonsController {
 			$NumResults,
 			'addon/browse/'.$FilterToType.'/'.$Sort.'/'.$this->Version.'/%1$s/?Form/Keywords='.Gdn_Format::Url($Search)
 		);
-		$this->SetData('Pager', $Pager, TRUE);
+		$this->SetData('_Pager', $Pager);
       
       if ($this->_DeliveryType != DELIVERY_TYPE_ALL)
          $this->SetJson('MoreRow', $Pager->ToString('more'));
@@ -542,11 +557,12 @@ class AddonController extends AddonsController {
 			$this->AddonModel
 				->SQL
 				->Where('a.Vanilla2', $this->Version == '1' ? '0' : '1');
-      
-      if (in_array($this->Filter, array('themes', 'plugins', 'applications')))
+
+      $AddonTypeID = GetValue($this->Filter, AddonModel::$TypesPlural);
+      if ($AddonTypeID)
 			$this->AddonModel
 				->SQL
-				->Where('t.Label', substr($this->Filter, 0, -1));
+				->Where('a.AddonTypeID', $AddonTypeID);
 	}
    
    public function AddPicture($AddonID = '') {

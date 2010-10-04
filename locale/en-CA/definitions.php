@@ -10,3 +10,4 @@ Contact Vanilla Forums Inc. at support [at] vanillaforums [dot] com
 
 $Definition['TestedWith'] = 'Testing information';
 $Definition['AddonTypeID'] = 'Addon type';
+$Definition['ValidateAddonKey'] = 'The addon key cannot be a number and cannot contain any dash (-) characters.';

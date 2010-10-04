@@ -27,13 +27,12 @@ $Construct->Table('AddonType')
    ->Column('Visible', 'tinyint(1)', '1')
    ->Set($Explicit, $Drop);
 
-if ($SQL->Select()->From('AddonType')->Get()->NumRows() == 0) {
-   $SQL->Insert('AddonType', array('Label' => 'Plugin', 'Visible' => '1'));
-   $SQL->Insert('AddonType', array('Label' => 'Theme', 'Visible' => '1'));
-   $SQL->Insert('AddonType', array('Label' => 'Style', 'Visible' => '0'));
-   $SQL->Insert('AddonType', array('Label' => 'Language', 'Visible' => '0'));
-   $SQL->Insert('AddonType', array('Label' => 'Application', 'Visible' => '1'));
-}
+$SQL->Replace('AddonType', array('Label' => 'Plugin', 'Visible' => '1'), array('AddonTypeID' => 1), TRUE);
+$SQL->Replace('AddonType', array('Label' => 'Theme', 'Visible' => '1'), array('AddonTypeID' => 2), TRUE);
+$SQL->Replace('AddonType', array('Label' => 'Style', 'Visible' => '0'), array('AddonTypeID' => 3), TRUE);
+$SQL->Replace('AddonType', array('Label' => 'Locale', 'Visible' => '1'), array('AddonTypeID' => 4), TRUE);
+$SQL->Replace('AddonType', array('Label' => 'Application', 'Visible' => '1'), array('AddonTypeID' => 5), TRUE);
+$SQL->Replace('AddonType', array('Label' => 'Core', 'Visible' => '1'), array('AddonTypeID' => 10), TRUE);
 
 $Construct->Table('Addon');
 $Description2Exists = $Construct->ColumnExists('Description2');

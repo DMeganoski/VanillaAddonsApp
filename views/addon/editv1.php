@@ -12,11 +12,6 @@ echo $this->Form->Errors();
 <ul>
 	<li>
 		<?php
-			echo $this->Form->CheckBox('Vanilla2', 'This Addon is for Vanilla 2', array('value' => '1'));
-		?>
-	</li>
-	<li>
-		<?php
 			echo $this->Form->Label('Type of Addon', 'AddonTypeID');
 			echo $this->Form->DropDown(
 				'AddonTypeID',

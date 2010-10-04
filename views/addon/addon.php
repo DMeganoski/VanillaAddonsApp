@@ -1,6 +1,6 @@
 <?php if (!defined('APPLICATION')) exit();
 $Session = Gdn::Session();
-$VanillaVersion = $this->Addon->Vanilla2 == '1' ? '2' : '1';
+$VanillaVersion = $this->Data('Vanilla2') == '1' ? '2' : '1';
 
 if ($this->DeliveryType() == DELIVERY_TYPE_ALL) {
 	// echo $this->FetchView('head');
@@ -10,27 +10,34 @@ if ($this->DeliveryType() == DELIVERY_TYPE_ALL) {
 			<?php echo T('Found in: ');
 			echo Anchor('Addons', '/addon/browse/');
 			?>
-			<span>&rarr;</span> <?php echo Anchor($this->Addon->Type.'s', '/addon/browse/'.strtolower($this->Addon->Type).'s'); ?>
+			<span>&rarr;</span> <?php
+            $TypesPlural = array_flip($this->Data('_TypesPlural'));
+            $TypePlural = GetValue($this->Data('AddonTypeID'), $TypesPlural, 'all');
+            echo Anchor(T($TypePlural), '/addon/browse/'.strtolower($TypePlural));
+         ?>
 		</div>
-		<?php echo $this->Addon->Name; ?>
-		<?php echo $this->Addon->Version; ?>
+		<?php echo $this->Data('Name'); ?>
+		<?php echo $this->Data('Version'); ?>
 	</h1>
 	<?php
-	if ($Session->UserID == $this->Addon->InsertUserID || $Session->CheckPermission('Addons.Addon.Manage')) {
+   $AddonID = $this->Data('AddonID');
+	if ($Session->UserID == $this->Data('InsertUserID') || $Session->CheckPermission('Addons.Addon.Manage')) {
+      $Ver = ($this->Data('Checked') ? '' : 'v1');
+
 		echo '<div class="AddonOptions">';
-		echo Anchor('Edit Details', '/addon/edit/'.$this->Addon->AddonID, 'Popup');
-		echo '|'.Anchor('Upload New Version', '/addon/newversion/'.$this->Addon->AddonID, 'Popup');
-		echo '|'.Anchor('Upload Screen', '/addon/addpicture/'.$this->Addon->AddonID, 'Popup');
-		echo '|'.Anchor('Upload Icon', '/addon/icon/'.$this->Addon->AddonID, 'Popup');
+		echo Anchor('Edit Details', "/addon/edit{$Ver}/$AddonID", 'Popup');
+		echo '|'.Anchor('Upload New Version', "/addon/newversion{$Ver}/$AddonID", 'Popup');
+		echo '|'.Anchor('Upload Screen', '/addon/addpicture/'.$AddonID, 'Popup');
+		echo '|'.Anchor('Upload Icon', '/addon/icon/'.$AddonID, 'Popup');
       if ($Session->CheckPermission('Addons.Addon.Manage'))
-         echo '|'.Anchor('Check', '/addon/check/'.$this->Addon->AddonID);
+         echo '|'.Anchor('Check', '/addon/check/'.$AddonID);
 		if ($Session->CheckPermission('Addons.Addon.Approve'))
-			echo '|'.Anchor($this->Addon->DateReviewed == '' ? 'Approve Version' : 'Unapprove Version', '/addon/approve/'.$this->Addon->AddonID, 'ApproveAddon');
+			echo '|'.Anchor($this->Data('DateReviewed') == '' ? 'Approve Version' : 'Unapprove Version', '/addon/approve/'.$AddonID, 'ApproveAddon');
 		
-		echo '|'.Anchor('Delete Addon', '/addon/delete/'.$this->Addon->AddonID.'?Target=/addon', 'DeleteAddon');
+		echo '|'.Anchor('Delete Addon', '/addon/delete/'.$AddonID.'?Target=/addon', 'DeleteAddon');
 		echo '</div>';
 	}
-	if ($this->Addon->DateReviewed == '')
+	if ($this->Data('DateReviewed') == '')
 		echo '<div class="Warning"><strong>Warning!</strong> This community-contributed addon has not been tested or code-reviewed. Use at your own risk.</div>';
 	else
 		echo '<div class="Approved"><strong>Approved!</strong> This addon has been reviewed and approved by Vanilla Forums staff.</div>';
@@ -39,16 +46,16 @@ if ($this->DeliveryType() == DELIVERY_TYPE_ALL) {
 	<div class="Legal">
 		<div class="DownloadPanel">
 			<div class="Box DownloadBox">
-				<p><?php echo Anchor('Download Now', '/get/'.$this->Addon->AddonID, 'BigButton'); ?></p>
+				<p><?php echo Anchor('Download Now', '/get/'.($this->Data('Slug') ? urlencode($this->Data('Slug')) : $AddonID), 'BigButton'); ?></p>
 				<dl>
 					<dt>Author</dt>
-					<dd><?php echo Anchor($this->Addon->InsertName, '/profile/'.urlencode($this->Addon->InsertName)); ?></dd>
+					<dd><?php echo Anchor($this->Data('InsertName'), '/profile/'.urlencode($this->Data('InsertName'))); ?></dd>
 					<dt>Version</dt>
-					<dd><?php echo $this->Addon->Version.'&nbsp;'; ?></dd>
+					<dd><?php echo $this->Data('Version').'&nbsp;'; ?></dd>
 					<dt>Released</dt>
-					<dd><?php echo Gdn_Format::Date($this->Addon->DateUploaded); ?></dd>
+					<dd><?php echo Gdn_Format::Date($this->Data('DateUploaded')); ?></dd>
 					<dt>Downloads</dt>
-					<dd><?php echo number_format($this->Addon->CountDownloads); ?></dd>
+					<dd><?php echo number_format($this->Data('CountDownloads')); ?></dd>
 				</dl>
 			</div>
 			<div class="Box RequirementBox">
@@ -58,8 +65,8 @@ if ($this->DeliveryType() == DELIVERY_TYPE_ALL) {
 					<dd><span class="Vanilla<?php echo $VanillaVersion; ?>">Vanilla <?php echo $VanillaVersion; ?></span></dd>
 				</dl>
 				<?php
-            if (!$this->Addon->Checked) {
-               $OtherRequirements = Gdn_Format::Display($this->Addon->Requirements);
+            if (!$this->Data('Checked')) {
+               $OtherRequirements = Gdn_Format::Display($this->Data('Requirements'));
                if ($OtherRequirements) {
                   ?>
                   <p>Other Requirements:</p>
@@ -67,7 +74,7 @@ if ($this->DeliveryType() == DELIVERY_TYPE_ALL) {
                   echo $OtherRequirements;
                }
             } else {
-               $OtherRequirements = Gdn_Format::Html($this->Addon->Requirements);
+               $OtherRequirements = Gdn_Format::Html($this->Data('Requirements'));
                if ($OtherRequirements) {
                   echo $OtherRequirements;
                }
@@ -76,12 +83,12 @@ if ($this->DeliveryType() == DELIVERY_TYPE_ALL) {
 			</div>
 		</div>
 	<?php
-	if ($this->Addon->Icon != '')
-		echo '<img class="Icon" src="'.Url('uploads/ai'.$this->Addon->Icon).'" />';
+	if ($this->Data('Icon') != '')
+		echo '<img class="Icon" src="'.Url('uploads/ai'.$this->Data('Icon')).'" />';
 		
-	echo Gdn_Format::Html($this->Addon->Description);
-   if ($this->Addon->Description2) {
-      echo '<br /><br />', Gdn_Format::Html($this->Addon->Description2);
+	echo Gdn_Format::Html($this->Data('Description'));
+   if ($this->Data('Description2')) {
+      echo '<br /><br />', Gdn_Format::Html($this->Data('Description2'));
    }
 	?>
 	</div>
@@ -102,7 +109,7 @@ if ($this->DeliveryType() == DELIVERY_TYPE_ALL) {
 	<h2 class="Questions">Questions
 	<?php
 	if ($Session->IsValid()) {
-		echo Anchor('Ask a Question', 'post/discussion?AddonID='.$this->Addon->AddonID, 'TabLink');
+		echo Anchor('Ask a Question', 'post/discussion?AddonID='.$AddonID, 'TabLink');
 	} else {
 		echo Anchor('Sign In', '/entry/?Target='.urlencode($this->SelfUrl), 'TabLink'.(C('Garden.SignIn.Popup') ? ' SignInPopup' : ''));
 	}

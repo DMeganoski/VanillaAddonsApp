@@ -6,6 +6,7 @@ if ($this->DeliveryType() == DELIVERY_TYPE_ALL)
 ?>
 <h1><?php echo T('Create a new Addon'); ?></h1>
 <?php
+echo '<div class="Info">', sprintf(T('This page is only for Vanilla 1 addons.', 'This page is only for adding Vanilla 1 addons. If you want to add a Vanilla 2 addon click <a href="%s">here</a>.'), Url('/addon/add')), '</div>';
 echo $this->Form->Open(array('enctype' => 'multipart/form-data'));
 echo $this->Form->Errors();
 ?>

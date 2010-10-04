@@ -21,9 +21,11 @@ if (!property_exists($this, 'HideSearch')) {
 		?>
 		or filter to
 		<?php
+      echo Anchor('Core', 'addon/browse/core/'.$Suffix, $this->Filter == 'core' ? 'Active' : '');
 		echo Anchor('Themes', 'addon/browse/themes/'.$Suffix, $this->Filter == 'themes' ? 'Active' : '');
 		echo Anchor('Plugins', 'addon/browse/plugins/'.$Suffix, $this->Filter == 'plugins' ? 'Active' : '');
 		echo Anchor('Applications', 'addon/browse/applications/'.$Suffix, $this->Filter == 'applications' ? 'Active' : '');
+      echo Anchor('Locales', 'addon/browse/locales/'.$Suffix, $this->Filter == 'locales' ? 'Active' : '');
 		?>
 	</div>
 	<div class="Options">

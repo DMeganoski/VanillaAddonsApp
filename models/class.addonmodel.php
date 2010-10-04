@@ -11,16 +11,36 @@ Contact Vanilla Forums Inc. at support [at] vanillaforums [dot] com
 class AddonModel extends Gdn_Model {
    const TYPE_PLUGIN = 1;
    const TYPE_THEME = 2;
-   const TYPE_LANGUAGE = 4;
+   const TYPE_LOCALE = 4;
    const TYPE_APPLICATION = 5;
+   const TYPE_CORE = 10;
+
+   public static $Types;
+   public static $TypesPlural;
 
    protected $_AddonCache = array();
 
    public function __construct() {
       parent::__construct('Addon');
+
+      self::$Types = array(
+          'plugin' => self::TYPE_PLUGIN,
+          'theme' => self::TYPE_THEME,
+          'locale' => self::TYPE_LOCALE,
+          'application' => self::TYPE_APPLICATION,
+          'core' => self::TYPE_CORE
+      );
+
+      self::$TypesPlural = array(
+          'plugins' => self::TYPE_PLUGIN,
+          'themes' => self::TYPE_THEME,
+          'locales' => self::TYPE_LOCALE,
+          'applications' => self::TYPE_APPLICATION,
+          'core' => self::TYPE_CORE
+      );
    }
    
-   public function AddonQuery() {
+   public function AddonQuery($VersionSlug = FALSE) {
       $this->SQL
          ->Select('a.*')
          ->Select('t.Label', '', 'Type')
@@ -29,9 +49,22 @@ class AddonModel extends Gdn_Model {
          ->Select('iu.Name', '', 'InsertName')
          ->From('Addon a')
          ->Join('AddonType t', 'a.AddonTypeID = t.AddonTypeID')
-         ->Join('AddonVersion v', 'a.CurrentAddonVersionID = v.AddonVersionID', 'left')
          ->Join('User iu', 'a.InsertUserID = iu.UserID')
          ->Where('a.Visible', '1');
+
+      if ($VersionSlug === FALSE) {
+         // Join in the current addon version.
+         $this->SQL->Join('AddonVersion v', 'a.CurrentAddonVersionID = v.AddonVersionID', 'left');
+      } else {
+         // Join in the version based on the slug.
+         if (is_int($VersionSlug)) {
+            $On = $this->SQL->ConditionExpr('v.AddonVersionID', $VersionSlug);
+         } else {
+            $On = 'a.AddonID = v.AddonID and '.$this->SQL->ConditionExpr('v.Version', $VersionSlug);
+         }
+
+         $this->SQL->Join('AddonVersion v', $On, 'left');
+      }
    }
 
       /**
@@ -64,7 +97,8 @@ class AddonModel extends Gdn_Model {
          $Name = $Entry['name'];
          $Delete = strpos($Name, '__MACOSX') !== FALSE
             | strpos($Name, '.DS_Store') !== FALSE
-            | strpos($Name, 'thumbs.db') !== FALSE;
+            | strpos($Name, 'thumbs.db') !== FALSE
+            | strpos($Name, '.gitignore') !== FALSE;
 
          if ($Delete) {
             $Deletes[] = $Entry;
@@ -98,6 +132,7 @@ class AddonModel extends Gdn_Model {
             $Zip->extractTo($FolderPath, $Entry['name']);
             $FilePath = CombinePaths(array($FolderPath, $Name));
             $Info = self::ParseInfoArray($FilePath, 'PluginInfo');
+            Gdn_FileSystem::RemoveFolder(dirname($FilePath));
 
             if (!is_array($Info) || !count($Info))
                continue;
@@ -153,6 +188,7 @@ class AddonModel extends Gdn_Model {
             $Zip->extractTo($FolderPath, $Entry['name']);
             $FilePath = CombinePaths(array($FolderPath, $Name));
             $Info = self::ParseInfoArray($FilePath, 'ApplicationInfo');
+            Gdn_FileSystem::RemoveFolder(dirname($FilePath));
 
             if (!is_array($Info) || !count($Info)) {
                $Result[] = "$Name: The application's info array could not be parsed.";
@@ -207,6 +243,7 @@ class AddonModel extends Gdn_Model {
             $Zip->extractTo($FolderPath, $Entry['name']);
             $FilePath = CombinePaths(array($FolderPath, $Name));
             $Info = self::ParseInfoArray($FilePath, 'ThemeInfo');
+            Gdn_FileSystem::RemoveFolder(dirname($FilePath));
 
             if (!is_array($Info) || !count($Info))
                continue;
@@ -242,7 +279,85 @@ class AddonModel extends Gdn_Model {
                    'Version' => $Info['Version'],
                    'Path' => $Path);
                break;
-            }  
+            }
+         }
+
+         if (StringEndsWith($Name, '/definitions.php')) {
+            if (count(explode('/', $Folder)) > 3) {
+               // The file is too deep to be a plugin file.
+               continue;
+            }
+
+             // This could be a locale pack, but we have to examine its info array.
+            $Zip->extractTo($FolderPath, $Entry['name']);
+            $FilePath = CombinePaths(array($FolderPath, $Name));
+            $Info = self::ParseInfoArray($FilePath, 'LocaleInfo');
+            Gdn_FileSystem::RemoveFolder(dirname($FilePath));
+
+            if (!is_array($Info) || !count($Info))
+               continue;
+
+            $Key = key($Info);
+            $Info = $Info[$Key];
+            $Valid = TRUE;
+
+            $Root = trim(substr($Name, 0, -strlen('/definitions.php')), '/');
+            // Make sure the locale is at least one folder deep.
+            if ($Root != $Key) {
+               $Result[] = $Name.': The locale pack\'s key must be the same as its folder name.';
+               $Valid = FALSE;
+            }
+
+            if (!GetValue('Description', $Info)) {
+               $Result[] = $Name.': '.sprintf(T('ValidateRequired'), T('Description'));
+               $Valid = FALSE;
+            }
+
+            if (!GetValue('Version', $Info)) {
+               $Result[] = $Name.': '.sprintf(T('ValidateRequired'), T('Version'));
+               $Valid = FALSE;
+            }
+
+            if ($Valid) {
+               // The locale pack was confirmed.
+               $Addon = array(
+                   'AddonKey' => $Key,
+                   'AddonTypeID' => self::TYPE_LOCALE,
+                   'Name' => GetValue('Name', $Info) ? $Info['Name'] : $Key,
+                   'Description' => $Info['Description'],
+                   'Version' => $Info['Version'],
+                   'Path' => $Path);
+               break;
+            }
+         }
+
+         // Check to see if the entry is a core file.
+         if (StringEndsWith($Name, '/index.php')) {
+            if (count(explode('/', $Folder)) != 3) {
+               // The file is too deep to be the core's index.php
+               continue;
+            }
+
+            // This could be a theme file, but we have to examine its info array.
+            $Zip->extractTo($FolderPath, $Entry['name']);
+            $FilePath = CombinePaths(array($FolderPath, $Name));
+
+            // Get the version number from the core.
+            $Version = self::ParseCoreVersion($FilePath);
+            Gdn_FileSystem::RemoveFolder(dirname($FilePath));
+
+            if (!$Version)
+               continue;
+
+            // The application was confirmed.
+            $Addon = array(
+                'AddonKey' => 'vanilla',
+                'AddonTypeID' => self::TYPE_CORE,
+                'Name' => 'Vanilla',
+                'Description' => 'Vanilla is an open-source, standards-compliant, multi-lingual, fully extensible discussion forum for the web. Anyone who has web-space that meets the requirements can download and use Vanilla for free!',
+                'Version' => $Version,
+                'Path' => $Path);
+            break;
          }
       }
 
@@ -334,7 +449,9 @@ class AddonModel extends Gdn_Model {
          $this->SQL->Limit($Limit, $Offset);
       }
 
-      return $this->SQL->Get();
+      $Result = $this->SQL->Get();
+      $this->SetCalculatedFields($Result);
+      return $Result;
    }
    
    public function GetCount($Wheres = '') {
@@ -376,33 +493,63 @@ class AddonModel extends Gdn_Model {
       if (isset($Addon)) {
          $Result = $Addon;
       } else {
-         $this->AddonQuery();
+         $this->AddonQuery(GetValue(2, $AddonID, FALSE));
 
          if (is_array($AddonID))
             $this->SQL->Where(array('a.AddonKey' => $AddonID[0], 'a.AddonTypeID' => $AddonID[1]));
          else
             $this->SQL->Where('a.AddonID', $AddonID);
 
-         $Result = $this->SQL->Get()->FirstRow();
+         $Result = $this->SQL->Get()->FirstRow(DATASET_TYPE_ARRAY);
          if (!$Result)
             return FALSE;
 
 
-         $this->SetFileUrl($Result);
+         $this->SetCalculatedFields($Result);
          $this->_AddonCache[] = $Result;
       }
 
-      if ($GetVersions && !isset($Result->Versions)) {
-         $Versions = $this->SQL->GetWhere('AddonVersion', array('AddonID' => GetValue('AddonID', $Result), 'Deleted' => 0))->Result();
+      if ($GetVersions && !isset($Result['Versions'])) {
+         $Versions = $this->SQL->GetWhere('AddonVersion', array('AddonID' => GetValue('AddonID', $Result), 'Deleted' => 0))->ResultArray();
          usort($Versions, array($this, 'VersionCompare'));
-         $Result->Versions = $Versions;
+         $Result['Versions'] = $Versions;
       }
 
       return $Result;
    }
 
+   /**
+    * Get an addon based on its slug in the following form:
+    *  - AddonID[-AddonName]
+    *  - AddonType-AddonKey[-Version]
+    *
+    * @param string|int $Slug The slug to lookup
+    * @param bool $GetVersions Whether or not to add an array of versions to the result.
+    * @return array
+    */
+   public function GetSlug($Slug, $GetVersions = FALSE) {
+      if (is_numeric($Slug)) {
+         $Result = $this->GetID($Slug, $GetVersions);
+      } else {
+         // This is a string identifier for the addon.
+         $Parts = explode('-', $Slug, 3);
+         $Key = GetValue(0, $Parts);
+
+         if (is_numeric($Key)) {
+            $Result = $this->GetID($Key, $GetVersions);
+         } else {
+            $Type = strtolower(GetValue(1, $Parts));
+            $TypeID = GetValue($Type, self::$Types, 0);
+            $Version = GetValue(2, $Parts);
+
+            return $this->GetID(array($Key, $TypeID, $Version), $GetVersions);
+         }
+      }
+      return $Result;
+   }
+
    public function VersionCompare($A, $B) {
-      return version_compare(GetValue('Version', $A), GetValue('Version', $B));
+      return -version_compare(GetValue('Version', $A), GetValue('Version', $B));
    }
 
    public function GetVersion($VersionID) {
@@ -414,6 +561,31 @@ class AddonModel extends Gdn_Model {
          ->Where('v.AddonVersionID', $VersionID)
          ->Get()->FirstRow(DATASET_TYPE_ARRAY);
       return $Result;
+   }
+
+   public static function ParseCoreVersion($Path) {
+      $fp = fopen($Path, 'rb');
+      $Application = FALSE;
+      $Version = FALSE;
+
+      while (($Line = fgets($fp)) !== FALSE) {
+         if (preg_match("`define\\('(.*?)', '(.*?)'\\);`", $Line, $Matches)) {
+            $Name = $Matches[1];
+            $Value = $Matches[2];
+            switch ($Name) {
+               case 'APPLICATION':
+                  $Application = $Value;
+                  break;
+               case 'APPLICATION_VERSION':
+                  $Version = $Value;
+            }
+         }
+
+         if ($Application !== FALSE && $Version !== FALSE)
+            break;
+      }
+      fclose($fp);
+      return $Version;
    }
 
    /**
@@ -499,23 +671,36 @@ class AddonModel extends Gdn_Model {
       return $Result;
    }
 
-   public function SetFileUrl(&$Data) {
+   public function SetCalculatedFields(&$Data, $Unset = TRUE) {
       if (!$Data)
          return;
-      
-      if (is_object($Data) || !isset($Data[0])) {
+
+      if (is_a($Data, 'Gdn_DataSet')) {
+         $this->SetCalculatedFields($Data->Result());
+      } elseif (is_object($Data) || !isset($Data[0])) {
          $File = GetValue('File', $Data);
-         $Url = Url("/uploads/File", TRUE);
-         SetValue('FileUrl', $Data, $Url);
-      }
-      foreach ($Data as &$Row) {
-         $File = GetValue('File', $Row);
-         $Url = Url("/uploads/File", TRUE);
-         SetValue('FileUrl', $Row, $Url);
+         SetValue('Url', $Data, Url("/uploads/$File", TRUE));
+
+         if (GetValue('AddonKey', $Data) && GetValue('Checked', $Data)) {
+            $Slug = GetValue('AddonKey', $Data).'-'.strtolower(GetValue('Type', $Data)).'-'.GetValue('Version', $Data);
+         } else {
+            $Slug = NULL;
+         }
+         SetValue('Slug', $Data, $Slug);
+
+
+         if ($Unset) {
+//            unset($Data['File']);
+         }
+
+      } else {
+         foreach ($Data as &$Row) {
+            $this->SetCalculatedFields($Row);
+         }
       }
    }
 
-   public function Save($Stub) {
+   public function Save($Stub, $V1 = FALSE) {
       $Session = Gdn::Session();
 
       $this->DefineSchema();
@@ -534,7 +719,7 @@ class AddonModel extends Gdn_Model {
       }
       
       // Analyze and fix the file.
-      if (isset($Path)) {
+      if (isset($Path) && !$V1) {
          try {
             $Addon = self::AnalyzeFile($Path, TRUE);
          } catch (Exception $Ex) {
@@ -548,6 +733,8 @@ class AddonModel extends Gdn_Model {
          $Addon = array_merge($Stub, $Addon);
       } else {
          $Addon = $Stub;
+         if (isset($Path))
+            $Addon['MD5'] = md5_file($Path);
       }
 
       // Get an existing addon.
@@ -571,11 +758,11 @@ class AddonModel extends Gdn_Model {
       $CurrentVersion = FALSE;
       if ($CurrentAddon && isset($Addon['Version'])) {
          // Search for a current version.
-         foreach ($CurrentAddon->Versions as $Index => $Version) {
+         foreach ($CurrentAddon['Versions'] as $Index => $Version) {
             if (isset($Addon['AddonVersionID'])) {
-               if ($Addon['AddonVersionID'] == $Version->AddonVersionID)
+               if ($Addon['AddonVersionID'] == $Version['AddonVersionID'])
                   $CurrentVersion = $Version;
-            } elseif (version_compare($Addon['Version'], $Version->Version) == 0) {
+            } elseif (version_compare($Addon['Version'], $Version['Version']) == 0) {
                $CurrentVersion = $Version;
             }
 
@@ -583,7 +770,7 @@ class AddonModel extends Gdn_Model {
             if (!$Version->Checked)
                continue;
 
-            if (!$MaxVersion || version_compare($MaxVersion->Version, $Version->Version, '>')) {
+            if (!$MaxVersion || version_compare($MaxVersion['Version'], $Version['Version'], '>')) {
                $MaxVersion = $Version;
             }
          }
@@ -738,8 +925,13 @@ class AddonModel extends Gdn_Model {
    }
 
    public function Validate($Post, $Insert) {
-      if ($Insert || isset($Post['AddonKey']))
+      $this->Validation->AddRule('AddonKey', 'function:ValidateAddonKey');
+
+      if (GetValue('Checked', $Post) && ($Insert || isset($Post['AddonKey']))) {
          $this->Validation->ApplyRule('AddonKey', 'Required');
+         $this->Validation->ApplyRule('AddonKey', 'AddonKey');
+      }
+
       if ($Insert || isset($Post['Description']))
          $this->Validation->ApplyRule('Description', 'Required');
 
@@ -802,4 +994,12 @@ class AddonModel extends Gdn_Model {
          $this->SQL->History()->Put('Addon', array('CurrentAddonVersionID' => $MaxVersion->Version), array('AddonID' => $AddonID));
       }
    }
+}
+
+function ValidateAddonKey($Value) {
+   if (is_numeric($Value))
+      return FALSE;
+   elseif (strpos($Value, '-') !== FALSE)
+      return FALSE;
+   return TRUE;
 }
