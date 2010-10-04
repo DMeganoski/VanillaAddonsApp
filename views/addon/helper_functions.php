@@ -36,10 +36,6 @@ function WriteAddon($Addon, $Alt) {
 					Downloads
 					<span><?php echo number_format($Addon->CountDownloads); ?></span>
 				</span>
-				<span class="Comments">
-					Comments
-					<span><?php echo number_format($Addon->CountComments); ?></span>
-				</span>
 				<span class="Updated">
 					Updated
 					<span><?php echo Gdn_Format::Date($Addon->DateUpdated); ?></span>
