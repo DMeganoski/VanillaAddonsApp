@@ -283,6 +283,13 @@ class AddonModel extends Gdn_Model {
          }
          SetValue('Slug', $Data, $Slug);
 
+         // Fix the icon path.
+         $Icon = GetValue('Icon', $Data);
+         if (strpos($Icon, '/') == FALSE) {
+            $Icon = 'ai'.$Icon;
+            SetValue('Icon', $Data, $Icon);
+         }
+
 
          if ($Unset) {
 //            unset($Data['File']);

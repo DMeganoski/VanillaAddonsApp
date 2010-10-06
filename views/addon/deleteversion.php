@@ -2,7 +2,7 @@
 
 echo $this->Form->Open();
 
-echo '<p>', T('Are you sure you want to delete this version?'), '</p>';
+echo '<p>', T('Are you sure you want to delete this?'), '</p>';
 
 
 echo '<p style="text-align: center">',

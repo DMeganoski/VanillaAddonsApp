@@ -13,9 +13,9 @@ function WriteAddon($Addon, $Alt) {
 			echo '<div>', Anchor($Addon->Name, $Url, 'Title'), '</div>';
 			
 			if ($Addon->Icon != '')
-				echo '<a class="Icon" href="'.Url($Url).'"><img src="'.Url('uploads/ai'.$Addon->Icon).'" /></a>';
+				echo '<div><a class="Icon" href="'.Url($Url).'"><img src="'.Url('uploads/'.$Addon->Icon).'" /></a></div>';
 	
-			echo Anchor(SliceString(Gdn_Format::Text($Addon->Description), 300), $Url);
+			echo '<div>', Anchor(SliceString(Gdn_Format::Text($Addon->Description), 300), $Url), '</div>';
 			?>
 			<div class="Meta">
 				<span class="<?php echo $Addon->Vanilla2 == '1' ? 'Vanilla2' : 'Vanilla1'; ?>"><?php
@@ -35,6 +35,10 @@ function WriteAddon($Addon, $Alt) {
 					Type
 					<span><?php echo $Addon->Type; ?></span>
 				</span>
+            <span class="Version">
+               Version
+               <span><?php echo $Addon->Version; ?></span>
+            </span>
 				<span class="Author">
 					Author
 					<span><?php echo $Addon->InsertName; ?></span>

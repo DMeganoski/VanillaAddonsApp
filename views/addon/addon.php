@@ -89,7 +89,7 @@ if ($this->DeliveryType() == DELIVERY_TYPE_ALL) {
 		</div>
 	<?php
 	if ($this->Data('Icon') != '')
-		echo '<img class="Icon" src="'.Url('uploads/ai'.$this->Data('Icon')).'" />';
+		echo '<img class="Icon" src="'.Url('uploads/'.$this->Data('Icon')).'" />';
 		
 	echo Gdn_Format::Html($this->Data('Description'));
    if ($this->Data('Description2')) {
@@ -103,9 +103,17 @@ if ($this->DeliveryType() == DELIVERY_TYPE_ALL) {
 		<div class="PictureBox">
 			<?php
 			foreach ($this->PictureData->Result() as $Picture) {
-				echo '<a rel="popable[gallery]" href="#Pic_'.$Picture->AddonPictureID.'"><img src="'.Url('uploads/at'.$Picture->File).'" /></a>';
-				echo '<div id="Pic_'.$Picture->AddonPictureID.'" style="display: none;"><img src="'.Url('uploads/ao'.$Picture->File).'" /></div>';
-			}
+            echo '<span class="AddonPicture">';
+				echo '<a rel="popable[gallery]" href="#Pic_'.$Picture->AddonPictureID.'"><img src="'.Url('uploads/'.ChangeBasename($Picture->File, 'at%s')).'" /></a>';
+
+            if ($Session->CheckPermission('Addon.Addons.Manage')) {
+               echo '<a class="Popup DeletePicture" href="'.Url('/addon/deletepicture/'.$Picture->AddonPictureID).'">x</a>';
+            }
+
+            echo '<div id="Pic_'.$Picture->AddonPictureID.'" style="display: none;"><img src="'.Url('uploads/'.ChangeBasename($Picture->File, 'ao%s')).'" /></div>';
+			
+            echo '</span>';
+         }
 			?>
 		</div>
 		<?php

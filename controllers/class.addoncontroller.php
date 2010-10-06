@@ -596,7 +596,7 @@ class AddonController extends AddonsController {
 
       $Addon = $this->AddonModel->GetID($AddonID);
       if (!$Addon)
-         Redirect('dashboard/home/filenotfound');
+         throw NotFoundException('Addon');
 
       if ($Session->UserID != $Addon->InsertUserID)
 			$this->Permission('Addons.Addon.Manage');
@@ -611,25 +611,27 @@ class AddonController extends AddonsController {
             $TmpImage = $UploadImage->ValidateUpload('Picture');
             
             // Generate the target image name
-            $TargetImage = $UploadImage->GenerateTargetName(PATH_ROOT . DS . 'uploads');
-            $ImageBaseName = pathinfo($TargetImage, PATHINFO_BASENAME);
+            $TargetImage = $UploadImage->GenerateTargetName(PATH_ROOT . DS . 'uploads', '');
+            $ImageBaseName = 'addons/screens/'.pathinfo($TargetImage, PATHINFO_BASENAME);
             
             // Save the uploaded image in large size
             $UploadImage->SaveImageAs(
                $TmpImage,
-               PATH_ROOT . DS . 'uploads' . DS . 'ao'.$ImageBaseName,
+               PATH_ROOT.'/uploads/'.ChangeBaseName($ImageBaseName, 'ao%s'),
                1000,
-               700
+               700,
+               FALSE, FALSE
             );
 
             // Save the uploaded image in thumbnail size
             $ThumbSize = 150;
             $UploadImage->SaveImageAs(
                $TmpImage,
-               PATH_ROOT . DS . 'uploads' . DS . 'at'.$ImageBaseName,
+               PATH_ROOT.'/uploads/'.ChangeBasename($ImageBaseName, 'at%s'),
                $ThumbSize,
                $ThumbSize,
-               TRUE
+               TRUE,
+               FALSE, FALSE
             );
             
          } catch (Exception $ex) {
@@ -642,28 +644,27 @@ class AddonController extends AddonsController {
          }
 
          // If there were no problems, redirect back to the addon
-         if ($this->Form->ErrorCount() == 0) 
-				Redirect('addon/'.$AddonID);
+         if ($this->Form->ErrorCount() == 0)
+            $this->RedirectUrl = Url('/addon/'.AddonModel::Slug($Addon));
       }
       $this->Render();
    }
    
    public function DeletePicture($AddonPictureID = '') {
       $this->Permission('Addons.Addon.Manage');
-      $AddonPictureModel = new Gdn_Model('AddonPicture');
-      $Picture = $AddonPictureModel->GetWhere(array('AddonPictureID' => $AddonPictureID));
-      if ($Picture) {
-         @unlink(PATH_ROOT . DS . 'uploads' . DS . 'ao'.$Picture->Name);
-         @unlink(PATH_ROOT . DS . 'uploads' . DS . 'at'.$Picture->Name);
-         @unlink(PATH_ROOT . DS . 'uploads' . DS . 'ai'.$Picture->Name);
-         $AddonPictureModel->Delete(array('AddonPictureID' => $AddonPictureID));
-      }
-      if ($this->_DeliveryType === DELIVERY_TYPE_ALL)
-         Redirect(GetIncomingValue('Return', Gdn_Url::WebRoot()));
 
-      $this->ControllerName = 'Home';
-      $this->View = 'FileNotFound';
-      $this->Render();
+      if ($this->Form->AuthenticatedPostBack() && $this->Form->GetFormValue('Yes')) {
+         $AddonPictureModel = new Gdn_Model('AddonPicture');
+         $Picture = $AddonPictureModel->GetWhere(array('AddonPictureID' => $AddonPictureID))->FirstRow();
+         if ($Picture) {
+            @unlink(PATH_ROOT.'/uploads/'.ChangeBasename($Picture->File, 'ao%s'));
+   //         @unlink(PATH_ROOT . '/uploads/' . DS . 'at'.$Picture->Name);
+            @unlink(PATH_ROOT.'/uploads/'.ChangeBasename($Picture->File, 'ai%s'));
+            $AddonPictureModel->Delete(array('AddonPictureID' => $AddonPictureID));
+         }
+         $this->RedirectUrl = Url('/addon/'.$Picture->AddonID);
+      }
+      $this->Render('deleteversion');
    }
 
    public function GetList($IDs) {
@@ -683,7 +684,7 @@ class AddonController extends AddonsController {
 
       $Addon = $this->AddonModel->GetID($AddonID);
       if (!$Addon)
-         Redirect('dashboard/home/filenotfound');
+         throw NotFoundException('Addon');
 
       if ($Session->UserID != $Addon->InsertUserID)
 			$this->Permission('Addons.Addon.Manage');
@@ -697,15 +698,16 @@ class AddonController extends AddonsController {
             $TmpImage = $UploadImage->ValidateUpload('Icon');
             
             // Generate the target image name
-            $TargetImage = $UploadImage->GenerateTargetName(PATH_ROOT . DS . 'uploads');
+            $TargetImage = $UploadImage->GenerateTargetName(PATH_ROOT . DS . 'uploads', '');
             $ImageBaseName = pathinfo($TargetImage, PATHINFO_BASENAME);
             
             // Save the uploaded icon
             $UploadImage->SaveImageAs(
                $TmpImage,
-               PATH_ROOT . DS . 'uploads' . DS . 'ai'.$ImageBaseName,
+               PATH_ROOT . '/uploads/addons/icons/'.$ImageBaseName,
                50,
-               50
+               50,
+               FALSE, FALSE
             );
 
          } catch (Exception $ex) {
@@ -714,15 +716,16 @@ class AddonController extends AddonsController {
          // If there were no errors, remove the old picture and insert the picture
          if ($this->Form->ErrorCount() == 0) {
             $Addon = $this->AddonModel->GetID($AddonID);
-            if ($Addon->Icon != '')
-               @unlink(PATH_ROOT . DS . 'uploads' . DS . 'ai'.$Addon->Icon);
+            if ($Addon['Icon'] != '') {
+               @unlink(PATH_ROOT.'/uploads/'.$Addon['Icon']);
+            }
                
-            $this->AddonModel->Save(array('AddonID' => $AddonID, 'Icon' => $ImageBaseName));
+            $this->AddonModel->Save(array('AddonID' => $AddonID, 'Icon' => 'addons/icons/'.$ImageBaseName));
          }
 
          // If there were no problems, redirect back to the addon
          if ($this->Form->ErrorCount() == 0)
-            Redirect('addon/'.$AddonID);
+            $this->RedirectUrl = Url('/addon/'.AddonModel::Slug($Addon));
       }
       $this->Render();
    }
