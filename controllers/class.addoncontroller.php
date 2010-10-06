@@ -11,8 +11,7 @@ Contact Vanilla Forums Inc. at support [at] vanillaforums [dot] com
 /**
  * MessagesController handles displaying lists of conversations and conversation messages.
  */
-class AddonController extends AddonsController {
-   
+class AddonController extends AddonsController {   
    public $Uses = array('Form', 'AddonModel', 'AddonCommentModel');
 	public $Filter = 'all';
 	public $Sort = 'recent';
@@ -38,7 +37,7 @@ class AddonController extends AddonsController {
    /**
     * Home Page
     */
-   public function Index($ID) {
+   public function Index($ID = '') {
       if ($ID != '') {
          $Addon = $this->AddonModel->GetSlug($ID, TRUE);
          if (!is_array($Addon)) {
@@ -199,6 +198,7 @@ class AddonController extends AddonsController {
       if ($SaveVersionID !== FALSE) {
          // Get the version data.
          $Version = $this->AddonModel->SQL->GetWhere('AddonVersion', array('AddonVersionID' => $SaveVersionID))->FirstRow(DATASET_TYPE_ARRAY);
+
          $this->AddonModel->Save($Version);
          $this->Form->SetValidationResults($this->AddonModel->ValidationResults());
       }
@@ -211,25 +211,34 @@ class AddonController extends AddonsController {
          throw NotFoundException('Addon');
 
       // Get the data for the most recent version of the addon.
-      $Path = PATH_ROOT."/uploads/{$Addon->File}";
+      $Path = PATH_ROOT."/uploads/{$Addon['File']}";
       
       $AddonData = ArrayTranslate((array)$Addon, array('AddonID', 'AddonKey', 'Name', 'Type', 'Description', 'Requirements', 'Checked'));
-      $FileAddonData = $this->AddonModel->AnalyzeFile($Path);
-      if ($FileAddonData) {
-         $AddonData = array_merge($AddonData, ArrayTranslate($FileAddonData, array('AddonKey' => 'File_AddonKey', 'Name' => 'File_Name', 'File_Type', 'Description' => 'File_Description', 'Requirements' => 'File_Requirements', 'Checked' => 'File_Checked')));
-         $AddonData['File_Type'] = GetValueR($FileAddonData['AddonTypeID'].'.Label', $AddonTypes, 'Unknown');
+      try {
+         $FileAddonData = UpdateModel::AnalyzeAddon($Path);
+         if ($FileAddonData) {
+            $AddonData = array_merge($AddonData, ArrayTranslate($FileAddonData, array('AddonKey' => 'File_AddonKey', 'Name' => 'File_Name', 'File_Type', 'Description' => 'File_Description', 'Requirements' => 'File_Requirements', 'Checked' => 'File_Checked')));
+            $AddonData['File_Type'] = GetValueR($FileAddonData['AddonTypeID'].'.Label', $AddonTypes, 'Unknown');
+         }
+      } catch (Exception $Ex) {
+         $AddonData['File_Error'] = $Ex->getMessage();
       }
       $this->SetData('Addon', $AddonData);
 
       // Go through the versions and make sure we get the versions to check out.
       $Versions = array();
-      foreach ($Addon->Versions as $Version) {
+      foreach ($Addon['Versions'] as $Version) {
          $Version = $Version;
-         $Path = PATH_ROOT."/uploads/{$Version->File}";
-         $FileVersionData = $this->AddonModel->AnalyzeFile($Path);
-         
-         $VersionData = ArrayTranslate((array)$Version, array('AddonVersionID', 'Version', 'MD5', 'Checked'));
-         $FileVersionData = ArrayTranslate($FileVersionData, array('Version' => 'File_Version', 'MD5' => 'File_MD5', 'Checked' => 'File_Checked'));
+         $Path = PATH_ROOT."/uploads/{$Version['File']}";
+
+         try {
+            $VersionData = ArrayTranslate((array)$Version, array('AddonVersionID', 'Version', 'MD5', 'Checked'));
+            
+            $FileVersionData = UpdateModel::AnalyzeAddon($Path);
+            $FileVersionData = ArrayTranslate($FileVersionData, array('Version' => 'File_Version', 'MD5' => 'File_MD5', 'Checked' => 'File_Checked'));
+         } catch (Exception $Ex) {
+            $FileVersionData = array('File_Error' => $Ex->getMessage());
+         }
          $Versions[] = array_merge($VersionData, $FileVersionData);
       }
       $this->SetData('Versions', $Versions);
@@ -265,7 +274,7 @@ class AddonController extends AddonsController {
       if (!$Addon)
          throw NotFoundException('Addon');
 
-      if ($Addon->InsertUserID != $Session->UserID)
+      if ($Addon['InsertUserID'] != $Session->UserID)
          $this->Permission('Addons.Addon.Manage');
 
       $this->Form->SetModel($this->AddonModel);
@@ -279,7 +288,7 @@ class AddonController extends AddonsController {
          if ($this->Form->Save() !== FALSE) {
             $Addon = $this->AddonModel->GetID($AddonID);
             $this->StatusMessage = T("Your changes have been saved successfully.");
-            $this->RedirectUrl = Url('/addon/'.$AddonID.'/'.Gdn_Format::Url($Addon->Name));
+            $this->RedirectUrl = Url('/addon/'.AddonModel::Slug($Addon));
          }
       }
 
@@ -387,13 +396,13 @@ class AddonController extends AddonsController {
       $Session = Gdn::Session();
       $Addon = $this->Addon = $this->AddonModel->GetID($AddonID);
       $VersionModel = new Gdn_Model('AddonVersion');
-      if ($Addon->DateReviewed == '') {
-         $VersionModel->Save(array('AddonVersionID' => $Addon->AddonVersionID, 'DateReviewed' => Gdn_Format::ToDateTime()));
+      if (!$Addon['DateReviewed']) {
+         $VersionModel->Save(array('AddonVersionID' => $Addon['AddonVersionID'], 'DateReviewed' => Gdn_Format::ToDateTime()));
       } else {
-         $VersionModel->Update(array('DateReviewed' => null), array('AddonVersionID' => $Addon->AddonVersionID));
+         $VersionModel->Update(array('DateReviewed' => null), array('AddonVersionID' => $Addon['AddonVersionID']));
       }
       
-      Redirect('addon/'.$AddonID.'/'.Gdn_Format::Url($Addon->Name));
+      Redirect('/addon/'.AddonModel::Slug($Addon));
   }
 
    public function Delete($AddonID = '') {
@@ -480,6 +489,8 @@ class AddonController extends AddonsController {
    }
    
 	public function Browse($FilterToType = '', $Sort = '', $VanillaVersion = '', $Page = '') {
+      $Checked = GetIncomingValue('checked', FALSE);
+
 		// Implement user prefs
 		$Session = Gdn::Session();
 		if ($Session->IsValid()) {
@@ -490,10 +501,13 @@ class AddonController extends AddonsController {
 				$Session->SetPreference('Addons.FilterVanilla', $VanillaVersion);
 			if ($Sort != '')
 				$Session->SetPreference('Addons.Sort', $Sort);
+         if ($Checked !== FALSE)
+            $Session->SetPreference('Addons.FilterChecked', $Checked);
 			
 			$FilterToType = $Session->GetPreference('Addons.FilterType', 'all');
 			$VanillaVersion = $Session->GetPreference('Addons.FilterVanilla', '2');
 			$Sort = $Session->GetPreference('Addons.Sort', 'recent');
+         $Checked = $Session->GetPreference('Addons.FilterChecked');
 		}
 		
 		if (!array_key_exists($FilterToType, AddonModel::$TypesPlural))
@@ -508,6 +522,9 @@ class AddonController extends AddonsController {
 		$this->Version = $VanillaVersion;
 			
 		$this->Sort = $Sort;
+
+      $this->FilterChecked = $Checked;
+
 		$this->AddJsFile('/js/library/jquery.gardenmorepager.js');
 		$this->AddJsFile('browse.js');
 
@@ -559,6 +576,11 @@ class AddonController extends AddonsController {
 			$this->AddonModel
 				->SQL
 				->Where('a.Vanilla2', $this->Version == '1' ? '0' : '1');
+
+      $Ch = array('unchecked' => 0, 'checked' => 1);
+      if (isset($Ch[$this->FilterChecked])) {
+         $this->AddonModel->SQL->Where('a.Checked', $Ch[$this->FilterChecked]);
+      }
 
       $AddonTypeID = GetValue($this->Filter, AddonModel::$TypesPlural);
       if ($AddonTypeID)
@@ -642,6 +664,16 @@ class AddonController extends AddonsController {
       $this->ControllerName = 'Home';
       $this->View = 'FileNotFound';
       $this->Render();
+   }
+
+   public function GetList($IDs) {
+      $IDs = explode(',', $IDs);
+      array_map('trim', $IDs);
+
+      $Addons = $this->AddonModel->GetIDs($IDs);
+      $this->SetData('Addons', $Addons);
+
+      $this->Render('browse');
    }
    
    public function Icon($AddonID = '') {

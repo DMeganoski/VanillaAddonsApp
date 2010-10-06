@@ -15,7 +15,7 @@ class UpdateController extends AddonsController {
    public $Uses = array('Database');
    
    /// <summary>
-   /// Get the current version of all the requested addons (as referenced by ADDON_TYPE and NAME).
+   /// Get the current version of all the requested addons.
    /// </summary>
    public function Index() {
       $Source = GetIncomingValue('source', '');

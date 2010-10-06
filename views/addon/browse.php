@@ -25,7 +25,7 @@ foreach ($this->Data('Addons')->Result() as $Addon) {
    $Alt = $Alt == ' Alt' ? '' : ' Alt';
    WriteAddon($Addon, $Alt);
 }
-if ($this->DeliveryType() == DELIVERY_TYPE_ALL) {
+if ($this->DeliveryType() == DELIVERY_TYPE_ALL && $this->Data('_Pager')) {
 ?>
    </ul>
    <?php

@@ -56,6 +56,11 @@ if ($this->DeliveryType() == DELIVERY_TYPE_ALL) {
 					<dd><?php echo Gdn_Format::Date($this->Data('DateUploaded')); ?></dd>
 					<dt>Downloads</dt>
 					<dd><?php echo number_format($this->Data('CountDownloads')); ?></dd>
+               <?php
+               if (Gdn::Session()->CheckPermission('Addons.Addon.Manage')) {
+                  echo '<dt>Checked</dt><dd>'.($this->Data('Checked') ? 'Yes' : 'No').'</dd>';
+               }
+               ?>
 				</dl>
 			</div>
 			<div class="Box RequirementBox">

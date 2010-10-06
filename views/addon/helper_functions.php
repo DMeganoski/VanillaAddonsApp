@@ -10,7 +10,7 @@ function WriteAddon($Addon, $Alt) {
 	<li class="Item AddonRow<?php echo $Alt; ?>">
 		<div class="ItemContent">
 			<?php
-			echo Anchor($Addon->Name, $Url, 'Title');
+			echo '<div>', Anchor($Addon->Name, $Url, 'Title'), '</div>';
 			
 			if ($Addon->Icon != '')
 				echo '<a class="Icon" href="'.Url($Url).'"><img src="'.Url('uploads/ai'.$Addon->Icon).'" /></a>';
@@ -21,6 +21,13 @@ function WriteAddon($Addon, $Alt) {
 				<span class="<?php echo $Addon->Vanilla2 == '1' ? 'Vanilla2' : 'Vanilla1'; ?>"><?php
 					echo $Addon->Vanilla2 == '1' ? 'Vanilla 2' : 'Vanilla 1'; ?></span>
 				<?php
+            if (Gdn::Session()->CheckPermission('Addons.Addon.Manage')) {
+               if ($Addon->Checked) {
+                  echo '<span class="Approved">Checked</span>';
+               } elseif ($Addon->Vanilla2) {
+                  echo Anchor('<span class="Closed">Check</span>', Url('/addon/check/'.$Addon->AddonID));
+               }
+            }
 				if ($Addon->DateReviewed != '')
 					echo '<span class="Approved">Approved</span>';
 				?>
