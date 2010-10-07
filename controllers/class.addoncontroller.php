@@ -618,8 +618,8 @@ class AddonController extends AddonsController {
             $UploadImage->SaveImageAs(
                $TmpImage,
                PATH_ROOT.'/uploads/'.ChangeBaseName($ImageBaseName, 'ao%s'),
-               1000,
                700,
+               1000,
                FALSE, FALSE
             );
 
