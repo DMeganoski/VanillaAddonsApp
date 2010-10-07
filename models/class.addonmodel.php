@@ -285,7 +285,7 @@ class AddonModel extends Gdn_Model {
 
          // Fix the icon path.
          $Icon = GetValue('Icon', $Data);
-         if (strpos($Icon, '/') == FALSE) {
+         if ($Icon && strpos($Icon, '/') == FALSE) {
             $Icon = 'ai'.$Icon;
             SetValue('Icon', $Data, $Icon);
          }
