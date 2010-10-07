@@ -232,10 +232,10 @@ class AddonController extends AddonsController {
          $Path = PATH_ROOT."/uploads/{$Version['File']}";
 
          try {
-            $VersionData = ArrayTranslate((array)$Version, array('AddonVersionID', 'Version', 'MD5', 'Checked'));
+            $VersionData = ArrayTranslate((array)$Version, array('AddonVersionID', 'Version', 'AddonKey', 'Name', 'MD5', 'Checked'));
             
             $FileVersionData = UpdateModel::AnalyzeAddon($Path);
-            $FileVersionData = ArrayTranslate($FileVersionData, array('Version' => 'File_Version', 'MD5' => 'File_MD5', 'Checked' => 'File_Checked'));
+            $FileVersionData = ArrayTranslate($FileVersionData, array('Version' => 'File_Version', 'AddonKey' => 'File_AddonKey', 'Name' => 'File_Name', 'MD5' => 'File_MD5', 'Checked' => 'File_Checked'));
          } catch (Exception $Ex) {
             $FileVersionData = array('File_Error' => $Ex->getMessage());
          }
