@@ -290,6 +290,16 @@ class AddonModel extends Gdn_Model {
             SetValue('Icon', $Data, $Icon);
          }
 
+         // Set the requirements.
+         if (GetValue('Checked', $Data)) {
+            $Requirements = GetValue('Requirements', $Data);
+            try {
+               $Requirements = unserialize($Requirements);
+               if (is_array($Requirements))
+                  SetValue('Requirements', $Data, $Requirements);
+            } catch (Exception $Ex) {
+            }
+         }
 
          if ($Unset) {
 //            unset($Data['File']);

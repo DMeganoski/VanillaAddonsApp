@@ -79,9 +79,21 @@ if ($this->DeliveryType() == DELIVERY_TYPE_ALL) {
                   echo $OtherRequirements;
                }
             } else {
-               $OtherRequirements = Gdn_Format::Html($this->Data('Requirements'));
-               if ($OtherRequirements) {
-                  echo $OtherRequirements;
+               if (is_array($this->Data('Requirements'))) {
+                  $Reqs = '';
+                  foreach ($this->Data('Requirements') as $ReqType => $ReqItems) {
+                     if (!is_array($ReqItems) || count($ReqItems) == 0)
+                        continue;
+                     $Reqs .= '<dt>'.T($ReqType).'</dt>';
+                     $Reqs .= '<dd>'.htmlspecialchars(ImplodeAssoc(' ', ', ', $ReqItems)).'</dd>';
+                  }
+                  if ($Reqs)
+                     echo "<dl>$Reqs</dl>";
+               } else {
+                  $OtherRequirements = Gdn_Format::Html($this->Data('Requirements'));
+                  if ($OtherRequirements) {
+                     echo $OtherRequirements;
+                  }
                }
             }
 				?>
