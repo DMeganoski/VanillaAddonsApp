@@ -382,7 +382,7 @@ class AddonModel extends Gdn_Model {
             if (!$Version['Checked'])
                continue;
 
-            if (!$MaxVersion || version_compare($MaxVersion['Version'], $Version['Version'], '>')) {
+            if (!$MaxVersion || version_compare($MaxVersion['Version'], $Version['Version'], '<')) {
                $MaxVersion = $Version;
             }
          }
