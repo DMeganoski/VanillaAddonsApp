@@ -306,7 +306,7 @@ class AddonController extends AddonsController {
       if (!$Addon)
          Redirect('dashboard/home/filenotfound');
          
-      if ($Addon->InsertUserID != $Session->UserID)
+      if ($Addon['InsertUserID'] != $Session->UserID)
          $this->Permission('Addons.Addon.Manage');
          
       $this->Form->SetModel($this->AddonModel);
@@ -320,7 +320,7 @@ class AddonController extends AddonsController {
          if ($this->Form->Save(TRUE) !== FALSE) {
             $Addon = $this->AddonModel->GetID($AddonID);
             $this->StatusMessage = T("Your changes have been saved successfully.");
-            $this->RedirectUrl = Url('/addon/'.$AddonID.'/'.Gdn_Format::Url($Addon->Name));
+            $this->RedirectUrl = Url('/addon/'.AddonModel::Slug($Addon));
          }
       }
       
@@ -337,7 +337,7 @@ class AddonController extends AddonsController {
       if (!$Addon)
          Redirect('dashboard/home/filenotfound');
          
-      if ($Addon->InsertUserID != $Session->UserID)
+      if ($Addon['InsertUserID'] != $Session->UserID)
          $this->Permission('Addons.Addon.Manage');
 
       $this->Form->SetModel($this->AddonModel);
@@ -373,7 +373,7 @@ class AddonController extends AddonsController {
             if ($NewVersionID) {
                $this->AddonModel->UpdateCurrentVersion($AddonID);
                $this->StatusMessage = T("New version saved successfully.");
-               $this->RedirectUrl = Url('/addon/'.$AddonID.'/'.Gdn_Format::Url($Addon->Name));
+               $this->RedirectUrl = Url('/addon/'.AddonModel::Slug($Addon));
             } else {
                if (file_exists($TargetFile))
                   unlink($TargetFile);
@@ -406,6 +406,7 @@ class AddonController extends AddonsController {
   }
 
    public function Delete($AddonID = '') {
+      $this->Permission('Addons.Addon.Manage');
       $Session = Gdn::Session();
       if (!$Session->IsValid())
          $this->Form->AddError('You must be authenticated in order to use this form.');
@@ -414,7 +415,7 @@ class AddonController extends AddonsController {
       if (!$Addon)
          Redirect('dashboard/home/filenotfound');
 
-      if ($Session->UserID != $Addon->InsertUserID)
+      if ($Session->UserID != $Addon['InsertUserID'])
 			$this->Permission('Addons.Addon.Manage');
 
       $Session = Gdn::Session();
@@ -598,7 +599,7 @@ class AddonController extends AddonsController {
       if (!$Addon)
          throw NotFoundException('Addon');
 
-      if ($Session->UserID != $Addon->InsertUserID)
+      if ($Session->UserID != $Addon['InsertUserID'])
 			$this->Permission('Addons.Addon.Manage');
          
       $AddonPictureModel = new Gdn_Model('AddonPicture');
@@ -686,7 +687,7 @@ class AddonController extends AddonsController {
       if (!$Addon)
          throw NotFoundException('Addon');
 
-      if ($Session->UserID != $Addon->InsertUserID)
+      if ($Session->UserID != $Addon['InsertUserID'])
 			$this->Permission('Addons.Addon.Manage');
 
       $this->Form->SetModel($this->AddonModel);

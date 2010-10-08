@@ -323,7 +323,7 @@ class AddonModel extends Gdn_Model {
       } elseif (isset($Stub['File'])) {
          $Path = CombinePaths(array(PATH_UPLOADS, $Stub['File']));
       } else {
-         if (!$Session->CheckPermission('Addons.Addon.Manage')) {
+         if (!$Session->CheckPermission('Addons.Addon.Manage') && isset($Stub['Filename'])) {
             // Only admins can modify plugin attributes without the file.
             $this->Validation->AddValidationResult('Filename', 'ValidateRequired');
             return FALSE;
@@ -598,7 +598,7 @@ class AddonModel extends Gdn_Model {
 
       $MaxVersion = FALSE;
       foreach ($Addon['Versions'] as $Version) {
-         if (!$Version['Checked'] || !$Version['Deleted'])
+         if (!$Version['Checked'] || $Version['Deleted'])
             continue;
          if (!$MaxVersion || version_compare($Version['Version'], $MaxVersion['Version'], '>')) {
             $MaxVersion = $Version;

@@ -34,8 +34,8 @@ if ($this->DeliveryType() == DELIVERY_TYPE_ALL) {
          echo '|'.Anchor('Check', '/addon/check/'.$AddonID);
 		if ($Session->CheckPermission('Addons.Addon.Approve'))
 			echo '|'.Anchor($this->Data('DateReviewed') == '' ? 'Approve Version' : 'Unapprove Version', '/addon/approve/'.$AddonID, 'ApproveAddon');
-		
-		echo '|'.Anchor('Delete Addon', '/addon/delete/'.$AddonID.'?Target=/addon', 'DeleteAddon');
+		if ($Session->CheckPermission('Addons.Addon.Manage'))
+         echo '|'.Anchor('Delete Addon', '/addon/delete/'.$AddonID.'?Target=/addon', 'DeleteAddon');
 		echo '</div>';
 	}
 	if ($this->Data('DateReviewed') == '')
