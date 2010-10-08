@@ -23,10 +23,11 @@ if ($this->DeliveryType() == DELIVERY_TYPE_ALL) {
    $AddonID = $this->Data('AddonID');
 	if ($Session->UserID == $this->Data('InsertUserID') || $Session->CheckPermission('Addons.Addon.Manage')) {
       $Ver = ($this->Data('Checked') ? '' : 'v1');
+      $Ver2 = ($this->Data('Checked') || $this->Data('Vanilla2') ? '' : 'v1');
 
 		echo '<div class="AddonOptions">';
 		echo Anchor('Edit Details', "/addon/edit{$Ver}/$AddonID", 'Popup');
-		echo '|'.Anchor('Upload New Version', "/addon/newversion{$Ver}/$AddonID", 'Popup');
+		echo '|'.Anchor('Upload New Version', "/addon/newversion{$Ver2}/$AddonID", 'Popup');
 		echo '|'.Anchor('Upload Screen', '/addon/addpicture/'.$AddonID, 'Popup');
 		echo '|'.Anchor('Upload Icon', '/addon/icon/'.$AddonID, 'Popup');
       if ($Session->CheckPermission('Addons.Addon.Manage'))

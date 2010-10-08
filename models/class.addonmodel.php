@@ -361,6 +361,8 @@ class AddonModel extends Gdn_Model {
       if ($Insert)
          $this->AddInsertFields ($Addon);
 
+      $this->AddUpdateFields($Addon); // always add update fields
+
       if (!$this->Validate($Addon, $Insert)) {
          return FALSE;
       }
@@ -393,7 +395,6 @@ class AddonModel extends Gdn_Model {
       if ($Insert) {
          $AddonID = $this->SQL->Insert($this->Name, $Fields);
       } else {
-         $this->AddUpdateFields($Fields);
          $AddonID = GetValue('AddonID', $CurrentAddon);
 
          // Only save the addon if it is the current version.
