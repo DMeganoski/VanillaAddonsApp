@@ -50,13 +50,13 @@ class AddonModel extends Gdn_Model {
 
       if (!$VersionSlug) {
          // Join in the current addon version.
-         $this->SQL->Join('AddonVersion v', 'a.CurrentAddonVersionID = v.AddonVersionID and v.Deleted = 0', 'left');
+         $this->SQL->Join('AddonVersion v', 'a.CurrentAddonVersionID = v.AddonVersionID', 'left');
       } else {
          // Join in the version based on the slug.
          if (is_int($VersionSlug)) {
             $On = $this->SQL->ConditionExpr('v.AddonVersionID', $VersionSlug);
          } else {
-            $On = 'a.AddonID = v.AddonID and '.$this->SQL->ConditionExpr('v.Version', $VersionSlug);
+            $On = 'v.Deleted = 0 and a.AddonID = v.AddonID and '.$this->SQL->ConditionExpr('v.Version', $VersionSlug);
          }
 
          $this->SQL->Join('AddonVersion v', $On, 'left');
