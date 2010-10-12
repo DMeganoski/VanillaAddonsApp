@@ -339,7 +339,7 @@ class AddonModel extends Gdn_Model {
       // Analyze and fix the file.
       if (isset($Path) && !$V1) {
          try {
-            $Addon = UpdateModel::AnalyzeAddon($Path, TRUE);
+            $Addon = UpdateModel::AnalyzeAddon($Path, FALSE);
          } catch (Exception $Ex) {
             $Addon = FALSE;
             $this->Validation->AddValidationResult('File', '@'.$Ex->getMessage());
