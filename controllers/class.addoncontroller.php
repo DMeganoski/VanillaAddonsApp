@@ -126,9 +126,10 @@ class AddonController extends AddonsController {
             // Save the addon
             $AddonID = $this->Form->Save();
             if ($AddonID !== FALSE) {
+               $Addon = $this->AddonModel->GetID($AddonID);
+
                // Redirect to the new addon
-               $Name = $this->Form->GetFormValue('Name', '');
-               Redirect("addon/$AddonID/".Gdn_Format::Url($Name));
+               Redirect("addon/".AddonModel::Slug($Addon, FALSE));
             }
          } else {
             if (isset($TargetFile) && file_exists($TargetFile))
@@ -371,9 +372,8 @@ class AddonController extends AddonsController {
          if ($this->Form->ErrorCount() == 0) {
             $NewVersionID = $this->Form->Save($V1);
             if ($NewVersionID) {
-               $this->AddonModel->UpdateCurrentVersion($AddonID);
                $this->StatusMessage = T("New version saved successfully.");
-               $this->RedirectUrl = Url('/addon/'.AddonModel::Slug($Addon));
+               $this->RedirectUrl = Url('/addon/'.AddonModel::Slug($Addon, FALSE));
             } else {
                if (file_exists($TargetFile))
                   unlink($TargetFile);

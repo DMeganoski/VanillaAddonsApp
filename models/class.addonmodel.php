@@ -48,7 +48,7 @@ class AddonModel extends Gdn_Model {
          ->Join('User iu', 'a.InsertUserID = iu.UserID')
          ->Where('a.Visible', '1');
 
-      if ($VersionSlug === FALSE) {
+      if (!$VersionSlug) {
          // Join in the current addon version.
          $this->SQL->Join('AddonVersion v', 'a.CurrentAddonVersionID = v.AddonVersionID', 'left');
       } else {
@@ -63,8 +63,14 @@ class AddonModel extends Gdn_Model {
       }
    }
 
-   public static function Slug($Addon) {
-      if ($Slug = GetValue('Slug', $Addon)) {
+   public static function Slug($Addon, $IncludeVersion = TRUE) {
+      if (isset($Addon['AddonKey']) && isset($Addon['Version'])) {
+         $Key = GetValue('AddonKey', $Addon);
+         $Type = GetValue('Type', $Addon);
+         //$Slug = strtolower(GetValue('AddonKey', $Data).'-'.GetValue('Type', $Data).'-'.GetValue('Version', $Data));
+         $Slug = strtolower($Key).'-'.strtolower($Type);
+         if ($IncludeVersion)
+            $Slug .= '-'.GetValue('Version', $Addon, '');
          return urlencode($Slug);
       } else {
          return GetValue('AddonID', $Addon).'-'.Gdn_Format::Url(GetValue('Name', $Addon));
@@ -431,12 +437,13 @@ class AddonModel extends Gdn_Model {
          }
 
          // Update the current version in the addon.
-         if (!$MaxVersion || version_compare($Addon['Version'], $MaxVersion['Version'], '>=')) {
+         if (!$MaxVersion || version_compare($CurrentAddon['Version'], $Addon['Version'], '<')) {
             $this->SQL->Put($this->Name,
                array('CurrentAddonVersionID' => $AddonVersionID),
                array('AddonID' => $AddonID));
          }
       }
+      $this->_AddonCache = array();
 
       return $AddonID;
    }
