@@ -64,7 +64,7 @@ class AddonModel extends Gdn_Model {
    }
 
    public static function Slug($Addon, $IncludeVersion = TRUE) {
-      if (isset($Addon['AddonKey']) && isset($Addon['Version'])) {
+      if (GetValue('AddonKey', $Addon) && GetValue('Version', $Addon)) {
          $Key = GetValue('AddonKey', $Addon);
          $Type = GetValue('Type', $Addon);
          //$Slug = strtolower(GetValue('AddonKey', $Data).'-'.GetValue('Type', $Data).'-'.GetValue('Version', $Data));

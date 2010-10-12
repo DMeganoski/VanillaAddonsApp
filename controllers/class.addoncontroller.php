@@ -43,6 +43,11 @@ class AddonController extends AddonsController {
          if (!is_array($Addon)) {
             $this->View = 'NotFound';
          } else {
+            $MaxVersion = GetValueR('Versions.0', $Addon);
+            if ($MaxVersion) {
+               $this->SetData('CurrentVersion', GetValue('Version', $MaxVersion));
+            }
+
             $AddonID = $Addon['AddonID'];
             $this->SetData($Addon);
             $this->AddCssFile('plugins/Voting/design/voting.css');
@@ -62,11 +67,7 @@ class AddonController extends AddonsController {
 				$this->Title($this->Data('Name').' '.$this->Data('Version').' by '.$this->Data('InsertName'));
 
             // Set the canonical url.
-            if ($this->Data('Slug')) {
-               $this->CanonicalUrl(Url("/addon/{$this->Data['Slug']}", TRUE));
-            } else {
-               $this->CanonicalUrl(Url("/addon/{$this->Data['AddonID']}/".Gdn_Format::Url($this->Data('Name')), TRUE));
-            }
+            $this->CanonicalUrl(Url('/addon/'.AddonModel::Slug($Addon, FALSE), TRUE));
          }
       } else {
 			$this->View = 'browse';

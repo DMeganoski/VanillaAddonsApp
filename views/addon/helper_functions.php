@@ -1,11 +1,7 @@
 <?php if (!defined('APPLICATION')) exit();
 
 function WriteAddon($Addon, $Alt) {
-   if (GetValue('Slug', $Addon)) {
-      $Url = '/addon/'.urlencode($Addon->Slug);
-   } else {
-      $Url = '/addon/'.$Addon->AddonID.'/'.Gdn_Format::Url($Addon->Name);
-   }
+   $Url = '/addon/'.AddonModel::Slug($Addon, FALSE);
 	?>
 	<li class="Item AddonRow<?php echo $Alt; ?>">
 		<div class="ItemContent">

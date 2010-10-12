@@ -52,7 +52,16 @@ if ($this->DeliveryType() == DELIVERY_TYPE_ALL) {
 					<dt>Author</dt>
 					<dd><?php echo Anchor($this->Data('InsertName'), '/profile/'.urlencode($this->Data('InsertName'))); ?></dd>
 					<dt>Version</dt>
-					<dd><?php echo $this->Data('Version').'&nbsp;'; ?></dd>
+					<dd><?php
+                  echo $this->Data('Version');
+
+                  $CurrentVersion = $this->Data('CurrentVersion');
+                  if ($CurrentVersion && $CurrentVersion != $this->Data('Version')) {
+                     echo ' ', Anchor('('.T('Current').')', '/addon/'.AddonModel::Slug($this->Data, FALSE));
+                  }
+                  echo '&nbsp;';
+                  
+               ?></dd>
 					<dt>Released</dt>
 					<dd><?php echo Gdn_Format::Date($this->Data('DateUploaded')); ?></dd>
 					<dt>Downloads</dt>
@@ -103,6 +112,11 @@ if ($this->DeliveryType() == DELIVERY_TYPE_ALL) {
 	<?php
 	if ($this->Data('Icon') != '')
 		echo '<img class="Icon" src="'.Url('uploads/'.$this->Data('Icon')).'" />';
+
+   $CurrentVersion = $this->Data('CurrentVersion');
+   if ($CurrentVersion && $CurrentVersion != $this->Data('Version')) {
+      echo '<p>', sprintf(T("This is not the most recent version of this plugin.", 'This is not the most recent version of this plugin. For the most recent version click <a href="%s">here</a>.'), URL('addon/'.AddonModel::Slug($this->Data, FALSE))), '</p>';
+   }
 		
 	echo Gdn_Format::Html($this->Data('Description'));
    if ($this->Data('Description2')) {
