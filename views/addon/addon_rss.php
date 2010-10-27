@@ -4,7 +4,7 @@
 ?>
    <description><?php echo Gdn_Format::Text($this->Head->Title()); ?></description>
    <language><?php echo Gdn::Config('Garden.Locale', 'en-US'); ?></language>
-   <atom:link href="<?php echo Url('/addons/addon/'.$Access.'/follow.rss'); ?>" rel="self" type="application/rss+xml" />
+   <atom:link href="<?php echo Url('/addon/'.$Access.'/follow.rss'); ?>" rel="self" type="application/rss+xml" />
 <?php
 $SlugBase = AddonModel::Slug($this->Data, FALSE);
 foreach ($this->Data('Versions') as $Version) {
@@ -12,7 +12,7 @@ foreach ($this->Data('Versions') as $Version) {
    ?>
    <item>
       <title><?php echo Gdn_Format::Text($this->Data('Name').' '.$Version['Version']); ?></title>
-      <link><?php echo Url('/addons/addon/'.$VersionSlug, TRUE); ?></link>
+      <link><?php echo Url('/addon/'.$VersionSlug, TRUE); ?></link>
       <pubDate><?php echo date(DATE_RSS, Gdn_Format::ToTimeStamp($Version['DateInserted'])); ?></pubDate>
       <dc:creator><?php echo Gdn_Format::Text($this->Data('InsertName')); ?></dc:creator>
       <guid isPermaLink="true"><?php echo Url('/addons/addon/'.$VersionSlug, TRUE); ?></guid>
