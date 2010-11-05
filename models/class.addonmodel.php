@@ -40,7 +40,7 @@ class AddonModel extends Gdn_Model {
       $this->SQL
          ->Select('a.*')
          ->Select('t.Label', '', 'Type')
-         ->Select('v.AddonVersionID, v.File, v.Version, v.DateReviewed, v.TestedWith')
+         ->Select('v.AddonVersionID, v.File, v.Version, v.DateReviewed, v.TestedWith, v.MD5, v.FileSize')
          ->Select('v.DateInserted', '', 'DateUploaded')
          ->Select('iu.Name', '', 'InsertName')
          ->From('Addon a')
@@ -179,6 +179,11 @@ class AddonModel extends Gdn_Model {
       if ($GetVersions && !isset($Result['Versions'])) {
          $Versions = $this->SQL->GetWhere('AddonVersion', array('AddonID' => GetValue('AddonID', $Result), 'Deleted' => 0))->ResultArray();
          usort($Versions, array($this, 'VersionCompare'));
+
+         foreach ($Versions as $Index => &$Version) {
+            $this->SetCalculatedFields($Version);
+         }
+
          $Result['Versions'] = $Versions;
       }
 
@@ -264,7 +269,7 @@ class AddonModel extends Gdn_Model {
    public function GetVersion($VersionID) {
       $Result = $this->SQL
          ->Select('a.*')
-         ->Select('v.AddonVersionID, v.Version, v.File, v.MD5, v.Checked')
+         ->Select('v.AddonVersionID, v.Version, v.File, v.MD5, v.FileSize, v.Checked')
          ->From('Addon a')
          ->Join('AddonVersion v', 'a.AddonID = v.AddonID')
          ->Where('v.AddonVersionID', $VersionID)
@@ -284,10 +289,8 @@ class AddonModel extends Gdn_Model {
 
          if (GetValue('AddonKey', $Data) && GetValue('Checked', $Data)) {
             $Slug = strtolower(GetValue('AddonKey', $Data).'-'.GetValue('Type', $Data).'-'.GetValue('Version', $Data));
-         } else {
-            $Slug = NULL;
+            SetValue('Slug', $Data, $Slug);
          }
-         SetValue('Slug', $Data, $Slug);
 
          // Fix the icon path.
          $Icon = GetValue('Icon', $Data);
@@ -351,8 +354,10 @@ class AddonModel extends Gdn_Model {
          $Addon = array_merge($Stub, $Addon);
       } else {
          $Addon = $Stub;
-         if (isset($Path))
+         if (isset($Path)) {
             $Addon['MD5'] = md5_file($Path);
+            $Addon['FileSize'] = filesize($Path);
+         }
       }
 
       // Get an existing addon.
