@@ -541,6 +541,7 @@ class AddonController extends AddonsController {
 		$this->SetData('Addons', $ResultSet);
 		$this->_BuildBrowseWheres($Search);
 		$NumResults = $this->AddonModel->GetCount(FALSE);
+      $this->SetData('TotalAddons', $NumResults);
 		
 		// Build a pager
 		$PagerFactory = new Gdn_PagerFactory();
@@ -582,6 +583,16 @@ class AddonController extends AddonsController {
       $Ch = array('unchecked' => 0, 'checked' => 1);
       if (isset($Ch[$this->FilterChecked])) {
          $this->AddonModel->SQL->Where('a.Checked', $Ch[$this->FilterChecked]);
+      }
+
+      if ($Types = $this->Request->Get('Types')) {
+         $Types = explode(',', $Types);
+         foreach ($Types as $Index => $Type) {
+            if (isset(AddonModel::$Types[trim($Type)]))
+               $Types[$Index] = AddonModel::$Types[trim($Type)];
+            else
+               unset($Types[$Index]);
+         }
       }
 
       $AddonTypeID = GetValue($this->Filter, AddonModel::$TypesPlural);

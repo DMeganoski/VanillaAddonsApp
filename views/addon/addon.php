@@ -112,6 +112,14 @@ if ($this->DeliveryType() == DELIVERY_TYPE_ALL) {
 			</div>
 		</div>
 	<?php
+
+   $AddonType = ucfirst($this->Data('Type'));
+   if ($AddonType && $AddonType != 'Core') {
+      $TypeHelp = T('AddonHelpFor'.$AddonType, '');
+      if ($TypeHelp)
+         echo '<div class="Help">'.$TypeHelp.'</div>';
+   }
+
 	if ($this->Data('Icon') != '') {
 		echo '<img class="Icon" src="'.Url('uploads/'.$this->Data('Icon')).'" />';
    }
