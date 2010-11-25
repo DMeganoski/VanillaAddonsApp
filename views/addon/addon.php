@@ -151,7 +151,7 @@ if ($this->DeliveryType() == DELIVERY_TYPE_ALL) {
 	if ($Session->IsValid()) {
 		echo Anchor('Ask a Question', 'post/discussion?AddonID='.$AddonID, 'TabLink');
 	} else {
-		echo Anchor('Sign In', '/entry/?Target='.urlencode($this->SelfUrl), 'TabLink'.(C('Garden.SignIn.Popup') ? ' SignInPopup' : ''));
+		echo Anchor('Sign In', '/entry/?Target='.urlencode($this->SelfUrl), 'TabLink'.(SignInPopup() ? ' SignInPopup' : ''));
 	}
 	?></h2>
 	<?php if (is_object($this->DiscussionData) && $this->DiscussionData->NumRows() > 0) { ?>

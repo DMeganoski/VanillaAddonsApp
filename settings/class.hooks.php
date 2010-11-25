@@ -95,7 +95,56 @@ class AddonsHooks implements Gdn_IPlugin {
       $Sender->Preferences['Email Notifications']['Email.AddonCommentMention'] = T('Notify me when people mention me in addon comments.');
    }
    
-
+   /**
+    * Adds 'Addons' tab to profiles and adds CSS & JS files to their head.
+    * 
+    * @since 2.0.0
+    * @package Vanilla
+    * 
+    * @param object $Sender ProfileController.
+    */ 
+   public function ProfileController_AddProfileTabs_Handler(&$Sender) {
+      if (is_object($Sender->User) && $Sender->User->UserID > 0) {
+         $Sender->AddProfileTab(T('Addons'), 'profile/addons/'.$Sender->User->UserID.'/'.urlencode($Sender->User->Name));
+         // Add the discussion tab's CSS and Javascript
+         $Sender->AddCssFile('profile.css', 'addons');
+         $Sender->AddJsFile('addons.js');
+      }
+   }
+   /**
+	 * Creates addons tab ProfileController.
+	 * 
+    * @since 2.0.0
+    * @package Vanilla
+	 *
+	 * @param object $Sender ProfileController.
+	 */
+   public function ProfileController_Addons_Create(&$Sender) {
+      $UserReference = ArrayValue(0, $Sender->RequestArgs, '');
+		$Username = ArrayValue(1, $Sender->RequestArgs, '');
+      // $Offset = ArrayValue(2, $Sender->RequestArgs, 0);
+      // Tell the ProfileController what tab to load
+		$Sender->GetUserInfo($UserReference, $Username);
+      $Sender->SetTabView('Addons', 'Profile', 'Addon', 'Addons');
+      
+      // Load the data for the requested tab.
+      // if (!is_numeric($Offset) || $Offset < 0)
+      //   $Offset = 0;
+      
+      $Offset = 0;
+      $Limit = 100;
+      $AddonModel = new AddonModel();
+		$ResultSet = $AddonModel->GetWhere(array('UserID' => $Sender->User->UserID), 'DateUpdated', 'desc', $Limit, $Offset);
+		$Sender->SetData('Addons', $ResultSet);
+		$NumResults = $AddonModel->GetCount(array('InsertUserID' => $Sender->User->UserID));
+      
+      // Set the HandlerType back to normal on the profilecontroller so that it fetches it's own views
+      $Sender->HandlerType = HANDLER_TYPE_NORMAL;
+      
+      // Render the ProfileController
+      $Sender->Render();
+   }
+   
    public function Setup() {
       $Database = Gdn::Database();
       $Config = Gdn::Factory(Gdn::AliasConfig);

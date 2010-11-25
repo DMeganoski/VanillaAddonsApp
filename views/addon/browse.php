@@ -30,4 +30,6 @@ if ($this->DeliveryType() == DELIVERY_TYPE_ALL && $this->Data('_Pager')) {
    </ul>
    <?php
    echo $this->Data('_Pager')->ToString('more');
+} else {
+?></ul><?php
 }
