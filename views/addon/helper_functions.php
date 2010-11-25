@@ -8,8 +8,9 @@ function WriteAddon($Addon, $Alt) {
 			<?php
 			echo '<div>', Anchor($Addon->Name, $Url, 'Title'), '</div>';
 			
-			if ($Addon->Icon != '')
-				echo '<div><a class="Icon" href="'.Url($Url).'"><img src="'.Url('uploads/'.$Addon->Icon).'" /></a></div>';
+			if ($Addon->Icon != '') {
+				echo '<div><a class="Icon" href="'.Url($Url).'"><div class="IconWrap"><img src="'.Url('uploads/'.$Addon->Icon).'" /></div></a></div>';
+         }
 	
 			echo '<div>', Anchor(SliceString(Gdn_Format::Text($Addon->Description), 300), $Url), '</div>';
 			?>

@@ -67,6 +67,8 @@ if ($this->DeliveryType() == DELIVERY_TYPE_ALL) {
 					<dt>Downloads</dt>
 					<dd><?php echo number_format($this->Data('CountDownloads')); ?></dd>
                <?php
+               if ($this->Data('FileSize'))
+                  echo '<dt>File Size</dt><dd>'.Gdn_Upload::FormatFileSize($this->Data('FileSize')).'</dd>';
                if (Gdn::Session()->CheckPermission('Addons.Addon.Manage')) {
                   echo '<dt>Checked</dt><dd>'.($this->Data('Checked') ? 'Yes' : 'No').'</dd>';
                }
@@ -110,8 +112,17 @@ if ($this->DeliveryType() == DELIVERY_TYPE_ALL) {
 			</div>
 		</div>
 	<?php
-	if ($this->Data('Icon') != '')
+
+   $AddonType = ucfirst($this->Data('Type'));
+   if ($AddonType && $AddonType != 'Core') {
+      $TypeHelp = T('AddonHelpFor'.$AddonType, '');
+      if ($TypeHelp)
+         echo '<div class="Help">'.$TypeHelp.'</div>';
+   }
+
+	if ($this->Data('Icon') != '') {
 		echo '<img class="Icon" src="'.Url('uploads/'.$this->Data('Icon')).'" />';
+   }
 
    $CurrentVersion = $this->Data('CurrentVersion');
    if ($CurrentVersion && $CurrentVersion != $this->Data('Version')) {

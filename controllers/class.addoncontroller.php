@@ -234,10 +234,10 @@ class AddonController extends AddonsController {
          $Path = PATH_ROOT."/uploads/{$Version['File']}";
 
          try {
-            $VersionData = ArrayTranslate((array)$Version, array('AddonVersionID', 'Version', 'AddonKey', 'Name', 'MD5', 'Checked'));
+            $VersionData = ArrayTranslate((array)$Version, array('AddonVersionID', 'Version', 'AddonKey', 'Name', 'MD5', 'FileSize', 'Checked'));
             
             $FileVersionData = UpdateModel::AnalyzeAddon($Path);
-            $FileVersionData = ArrayTranslate($FileVersionData, array('Version' => 'File_Version', 'AddonKey' => 'File_AddonKey', 'Name' => 'File_Name', 'MD5' => 'File_MD5', 'Checked' => 'File_Checked'));
+            $FileVersionData = ArrayTranslate($FileVersionData, array('Version' => 'File_Version', 'AddonKey' => 'File_AddonKey', 'Name' => 'File_Name', 'MD5' => 'File_MD5', 'FileSize' => 'File_FileSize', 'Checked' => 'File_Checked'));
          } catch (Exception $Ex) {
             $FileVersionData = array('File_Error' => $Ex->getMessage());
          }
@@ -541,6 +541,7 @@ class AddonController extends AddonsController {
 		$this->SetData('Addons', $ResultSet);
 		$this->_BuildBrowseWheres($Search);
 		$NumResults = $this->AddonModel->GetCount(FALSE);
+      $this->SetData('TotalAddons', $NumResults);
 		
 		// Build a pager
 		$PagerFactory = new Gdn_PagerFactory();
@@ -582,6 +583,16 @@ class AddonController extends AddonsController {
       $Ch = array('unchecked' => 0, 'checked' => 1);
       if (isset($Ch[$this->FilterChecked])) {
          $this->AddonModel->SQL->Where('a.Checked', $Ch[$this->FilterChecked]);
+      }
+
+      if ($Types = $this->Request->Get('Types')) {
+         $Types = explode(',', $Types);
+         foreach ($Types as $Index => $Type) {
+            if (isset(AddonModel::$Types[trim($Type)]))
+               $Types[$Index] = AddonModel::$Types[trim($Type)];
+            else
+               unset($Types[$Index]);
+         }
       }
 
       $AddonTypeID = GetValue($this->Filter, AddonModel::$TypesPlural);
@@ -707,8 +718,8 @@ class AddonController extends AddonsController {
             $UploadImage->SaveImageAs(
                $TmpImage,
                PATH_ROOT . '/uploads/addons/icons/'.$ImageBaseName,
-               50,
-               50,
+               128,
+               128,
                FALSE, FALSE
             );
 
