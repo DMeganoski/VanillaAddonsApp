@@ -36,6 +36,9 @@ if ($this->DeliveryType() == DELIVERY_TYPE_ALL) {
 			echo '|'.Anchor($this->Data('DateReviewed') == '' ? 'Approve Version' : 'Unapprove Version', '/addon/approve/'.$AddonID, 'ApproveAddon');
 		if ($Session->CheckPermission('Addons.Addon.Manage'))
          echo '|'.Anchor('Delete Addon', '/addon/delete/'.$AddonID.'?Target=/addon', 'DeleteAddon');
+
+      $this->FireEvent('AddonOptions');
+
 		echo '</div>';
 	}
 	if ($this->Data('DateReviewed') == '')
@@ -59,7 +62,7 @@ if ($this->DeliveryType() == DELIVERY_TYPE_ALL) {
                   if ($CurrentVersion && $CurrentVersion != $this->Data('Version')) {
                      echo ' ', Anchor('('.T('Current').')', '/addon/'.AddonModel::Slug($this->Data, FALSE));
                   }
-                  echo '&nbsp;';
+                  echo '&#160;';
                   
                ?></dd>
 					<dt>Released</dt>
@@ -72,6 +75,7 @@ if ($this->DeliveryType() == DELIVERY_TYPE_ALL) {
                if (Gdn::Session()->CheckPermission('Addons.Addon.Manage')) {
                   echo '<dt>Checked</dt><dd>'.($this->Data('Checked') ? 'Yes' : 'No').'</dd>';
                }
+               $this->FireEvent('AddonProperties');
                ?>
 				</dl>
 			</div>
