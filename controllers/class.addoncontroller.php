@@ -380,8 +380,8 @@ class AddonController extends AddonsController {
                $this->StatusMessage = T("New version saved successfully.");
                $this->RedirectUrl = Url('/addon/'.AddonModel::Slug($Addon, FALSE));
             } else {
-               if (file_exists($TargetFile))
-                  unlink($TargetFile);
+               if (file_exists($Path))
+                  unlink($Path);
             }
          }
       }
