@@ -146,22 +146,24 @@ $PermissionModel->Define(array(
    'Addons.Comments.Manage'
    ));
 
-// Set the intial member permissions.
-$PermissionModel->Save(array(
-   'RoleID' => 8,
-   'Addons.Addon.Add' => 1
-   ));
-   
-// Set the initial administrator permissions.
-$PermissionModel->Save(array(
-   'RoleID' => 16,
-   'Addons.Addon.Add' => 1,
-   'Addons.Addon.Manage' => 1,
-   'Addons.Comments.Manage' => 1
-   ));
+if (isset($$PermissionTableExists) && $PermissionTableExists) {
+   // Set the intial member permissions.
+   $PermissionModel->Save(array(
+      'RoleID' => 8,
+      'Addons.Addon.Add' => 1
+      ));
+
+   // Set the initial administrator permissions.
+   $PermissionModel->Save(array(
+      'RoleID' => 16,
+      'Addons.Addon.Add' => 1,
+      'Addons.Addon.Manage' => 1,
+      'Addons.Comments.Manage' => 1
+      ));
+}
 
 // Make sure that User.Permissions is blank so new permissions for users get applied.
-$SQL->Update('User', array('Permissions' => ''))->Put();
+//$SQL->Update('User', array('Permissions' => ''))->Put(); // done in PermissionModel::Save()
 
 // Insert some activity types
 ///  %1 = ActivityName

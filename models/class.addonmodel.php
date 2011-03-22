@@ -286,6 +286,12 @@ class AddonModel extends Gdn_Model {
       } elseif (is_object($Data) || !isset($Data[0])) {
          $File = GetValue('File', $Data);
          SetValue('Url', $Data, Url("/uploads/$File", TRUE));
+         $Icon = GetValue('Icon', $Data, '');
+         if ($Icon) {
+            SetValue('IconUrl', $Data, Url("/uploads/$Icon", TRUE));
+         } else {
+            SetValue('IconUrl', $Data, '');
+         }
 
          if (GetValue('AddonKey', $Data) && GetValue('Checked', $Data)) {
             $Slug = strtolower(GetValue('AddonKey', $Data).'-'.GetValue('Type', $Data).'-'.GetValue('Version', $Data));

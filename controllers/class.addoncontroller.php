@@ -593,6 +593,7 @@ class AddonController extends AddonsController {
             else
                unset($Types[$Index]);
          }
+         $this->AddonModel->SQL->WhereIn('a.AddonTypeID', $Types);
       }
 
       $AddonTypeID = GetValue($this->Filter, AddonModel::$TypesPlural);
