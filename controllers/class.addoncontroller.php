@@ -233,7 +233,7 @@ class AddonController extends AddonsController {
       $Versions = array();
       foreach ($Addon['Versions'] as $Version) {
          $Version = $Version;
-         $Path = PATH_ROOT."/uploads/{$Version['File']}";
+         $Path = PATH_LOCAL_UPLOADS."/{$Version['File']}";
 
          try {
             $VersionData = ArrayTranslate((array)$Version, array('AddonVersionID', 'Version', 'AddonKey', 'Name', 'MD5', 'FileSize', 'Checked'));
