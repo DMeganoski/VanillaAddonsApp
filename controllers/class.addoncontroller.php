@@ -106,7 +106,7 @@ class AddonController extends AddonsController {
             $Extension = pathinfo($Upload->GetUploadedFileName(), PATHINFO_EXTENSION);
 
             // Generate the target file name
-            $TargetFile = $Upload->GenerateTargetName(PATH_LOCAL_UPLOADS.'/addons', $Extension);
+            $TargetFile = $Upload->GenerateTargetName('addons', $Extension);
             $FileBaseName = pathinfo($TargetFile, PATHINFO_BASENAME);
 
             // Save the uploaded file
@@ -163,7 +163,7 @@ class AddonController extends AddonsController {
             $Extension = pathinfo($Upload->GetUploadedFileName(), PATHINFO_EXTENSION);
             
             // Generate the target file name
-            $TargetFile = $Upload->GenerateTargetName(PATH_ROOT . DS . 'uploads/addons', $Extension);
+            $TargetFile = $Upload->GenerateTargetName('addons', $Extension);
             $FileBaseName = pathinfo($TargetFile, PATHINFO_BASENAME);
             
             // Save the uploaded file
@@ -355,7 +355,7 @@ class AddonController extends AddonsController {
             $Extension = pathinfo($Upload->GetUploadedFileName(), PATHINFO_EXTENSION);
             
             // Generate the target name
-            $TargetFile = $Upload->GenerateTargetName(PATH_ROOT . DS . 'uploads/addons', $Extension);
+            $TargetFile = $Upload->GenerateTargetName('addons', $Extension);
             $FileBaseName = pathinfo($TargetFile, PATHINFO_BASENAME);
             
             // Save the uploaded file
