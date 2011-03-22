@@ -215,7 +215,7 @@ class AddonController extends AddonsController {
          throw NotFoundException('Addon');
 
       // Get the data for the most recent version of the addon.
-      $Path = PATH_ROOT."/uploads/{$Addon['File']}";
+      $Path = PATH_LOCAL_UPLOADS.$Addon['File'];
       
       $AddonData = ArrayTranslate((array)$Addon, array('AddonID', 'AddonKey', 'Name', 'Type', 'Description', 'Requirements', 'Checked'));
       try {
