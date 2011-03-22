@@ -10,15 +10,51 @@ Contact Vanilla Forums Inc. at support [at] vanillaforums [dot] com
 
 
 class AddonsHooks implements Gdn_IPlugin {
-   public function Controller_Event_Handler($Sender) {
-      // Do something
-   }
-   
-   // Filter discussion list to a particular addonid if it is present on the model (I add it to the model manually before running the Get() method in the AddonController.
+   /**
+    * DiscussionModel Get() additions.
+    *
+    * Note: AddonID is manually added to DiscussionModel before Get() in AddonController.
+    */
    public function DiscussionModel_BeforeGet_Handler($Sender) {
       $AddonID = GetValue('AddonID', $Sender);
-      if (is_numeric($AddonID) && $AddonID > 0)
+      if (is_numeric($AddonID) && $AddonID > 0) {
+         // Filter discussion list to a particular AddonID if present in model
          $Sender->SQL->Where('AddonID', $AddonID);
+      }
+      else { 
+         // Make Addon name available on discussions list
+         $Sender->SQL->Select('ad.Name', '', 'AddonName')
+            ->Join('Addon ad', 'd.AddonID = ad.AddonID', 'left');
+      }
+   }
+   
+   /**
+    * Hook for discussion prefixes in /discussions.
+    */
+   public function DiscussionsController_BeforeDiscussionName_Handler($Sender) {
+      $this->AddonDiscussionPrefix($Sender);
+   }
+   
+   /**
+    * Hook for discussion prefixes in /categories.
+    */
+   public function CategoriesController_BeforeDiscussionName_Handler($Sender) {
+      $this->AddonDiscussionPrefix($Sender);
+   }
+   
+   /**
+    * Add prefix to the passed controller's discussion names when they are re: an addon.
+    *
+    * Ex: [AddonName] Discussion original name
+    */
+   public function AddonDiscussionPrefix($Sender) {
+      $AddonID = GetValue('AddonID', $Sender->EventArguments['Discussion']);
+      if (is_numeric($AddonID) && $AddonID > 0) {
+         $AddonName = GetValue('AddonName', $Sender->EventArguments['Discussion']);
+         $DiscussionName =& $Sender->EventArguments['Discussion']->Name;
+         if ($AddonName != '')
+            $DiscussionName = '[' . htmlentities($AddonName) . '] ' . $DiscussionName;
+      }
    }
    
    // Write information about addons to the discussion if it is related to an addon
