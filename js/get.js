@@ -1,10 +1,10 @@
 jQuery(document).ready(function($) {
    setTimeout(function() {
       var loc = location.href;
-      if (loc.substring(0,-1) != '/')
-         loc += '/';
+      if (loc.substring(0,-4) != '.zip')
+         loc += '.';
 
-      loc += '1';
-      document.location = loc;
+      loc += 'zip';
+      document.location.replace(loc);
    }, 3000);
 });

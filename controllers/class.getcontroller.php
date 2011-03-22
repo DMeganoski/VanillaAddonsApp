@@ -56,8 +56,8 @@ class GetController extends AddonsController {
                $Filename = "{$this->Addon['Name']}-{$this->Addon['Version']}";
 
             $Filename = Gdn_Format::Url($Filename).'.zip';
-
-				Gdn_FileSystem::ServeFile('uploads/'.$this->Addon['File'], $Filename);
+            
+				Gdn_FileSystem::ServeFile(PATH_LOCAL_UPLOADS.'/'.$this->Addon['File'], $Filename);
 			}
 		}
 		
