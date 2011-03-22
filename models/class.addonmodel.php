@@ -288,7 +288,7 @@ class AddonModel extends Gdn_Model {
          SetValue('Url', $Data, Url("/uploads/$File", TRUE));
          $Icon = GetValue('Icon', $Data, '');
          if ($Icon) {
-            SetValue('IconUrl', $Data, Url("/uploads/$Icon", TRUE));
+            SetValue('IconUrl', $Data, Gdn_Upload::Url($Icon));
          } else {
             SetValue('IconUrl', $Data, '');
          }

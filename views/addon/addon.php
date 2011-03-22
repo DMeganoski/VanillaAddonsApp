@@ -125,7 +125,7 @@ if ($this->DeliveryType() == DELIVERY_TYPE_ALL) {
    }
 
 	if ($this->Data('Icon') != '') {
-		echo '<img class="Icon" src="'.Url('uploads/'.$this->Data('Icon')).'" />';
+		echo '<img class="Icon" src="'.Gdn_Upload::Url($this->Data('Icon')).'" />';
    }
 
    $CurrentVersion = $this->Data('CurrentVersion');

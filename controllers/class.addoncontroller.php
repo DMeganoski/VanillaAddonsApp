@@ -114,7 +114,8 @@ class AddonController extends AddonsController {
                $TmpFile,
                $TargetFile
             );
-            $this->Form->SetFormValue('Path', $TargetFile);
+            $Path = $Upload->CopyLocal($TargetFile);
+            $this->Form->SetFormValue('Path', $Path);
          } catch (Exception $ex) {
             $this->Form->AddError($ex->getMessage());
          }
@@ -171,6 +172,7 @@ class AddonController extends AddonsController {
                $TmpFile,
                $TargetFile
             );
+            $Path = $Upload->CopyLocal($TargetFile);
          } catch (Exception $ex) {
             $this->Form->AddError($ex->getMessage());
          }
@@ -363,7 +365,9 @@ class AddonController extends AddonsController {
                $TmpFile,
                $TargetFile
             );
-            $this->Form->SetFormValue('Path', $TargetFile);
+            $Path = $Upload->CopyLocal($TargetFile);
+            
+            $this->Form->SetFormValue('Path', $Path);
 //				$this->Form->SetFormValue('TestedWith', 'Blank');
          } catch (Exception $ex) {
             $this->Form->AddError($ex->getMessage());
@@ -670,10 +674,11 @@ class AddonController extends AddonsController {
       if ($this->Form->AuthenticatedPostBack() && $this->Form->GetFormValue('Yes')) {
          $AddonPictureModel = new Gdn_Model('AddonPicture');
          $Picture = $AddonPictureModel->GetWhere(array('AddonPictureID' => $AddonPictureID))->FirstRow();
+         $Upload = new Gdn_Upload();
+         
          if ($Picture) {
-            @unlink(PATH_ROOT.'/uploads/'.ChangeBasename($Picture->File, 'ao%s'));
-   //         @unlink(PATH_ROOT . '/uploads/' . DS . 'at'.$Picture->Name);
-            @unlink(PATH_ROOT.'/uploads/'.ChangeBasename($Picture->File, 'ai%s'));
+            $Upload->Delete(ChangeBasename($Picture->File, 'ao%s'));
+            $Upload->Delete(ChangeBasename($Picture->File, 'at%s'));
             $AddonPictureModel->Delete(array('AddonPictureID' => $AddonPictureID));
          }
          $this->RedirectUrl = Url('/addon/'.$Picture->AddonID);
@@ -712,13 +717,13 @@ class AddonController extends AddonsController {
             $TmpImage = $UploadImage->ValidateUpload('Icon');
             
             // Generate the target image name
-            $TargetImage = $UploadImage->GenerateTargetName(PATH_ROOT . DS . 'uploads', '');
+            $TargetImage = $UploadImage->GenerateTargetName('addons/icons', '');
             $ImageBaseName = pathinfo($TargetImage, PATHINFO_BASENAME);
             
             // Save the uploaded icon
             $UploadImage->SaveImageAs(
                $TmpImage,
-               PATH_ROOT . '/uploads/addons/icons/'.$ImageBaseName,
+               $TargetImage,
                128,
                128,
                FALSE, FALSE
@@ -729,12 +734,12 @@ class AddonController extends AddonsController {
          }
          // If there were no errors, remove the old picture and insert the picture
          if ($this->Form->ErrorCount() == 0) {
-            $Addon = $this->AddonModel->GetID($AddonID);
-            if ($Addon['Icon'] != '') {
-               @unlink(PATH_ROOT.'/uploads/'.$Addon['Icon']);
+//            $Addon = $this->AddonModel->GetID($AddonID);
+            if ($Addon['Icon']) {
+               $UploadImage->Delete($Addon['Icon']);
             }
                
-            $this->AddonModel->Save(array('AddonID' => $AddonID, 'Icon' => 'addons/icons/'.$ImageBaseName));
+            $this->AddonModel->Save(array('AddonID' => $AddonID, 'Icon' => $TargetImage));
          }
 
          // If there were no problems, redirect back to the addon
