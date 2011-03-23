@@ -50,7 +50,7 @@ class GetController extends AddonsController {
 				));
 				$this->AddonModel->SetProperty($AddonID, 'CountDownloads', $this->Addon['CountDownloads'] + 1);
 
-            if ($this->Addon['Slug'])
+            if (GetValue('Slug', $this->Addon))
                $Filename = $this->Addon['Slug'];
             else
                $Filename = "{$this->Addon['Name']}-{$this->Addon['Version']}";
