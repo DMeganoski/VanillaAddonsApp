@@ -300,7 +300,7 @@ class AddonController extends AddonsController {
    }
    
    public function EditV1($AddonID = '') {
-		$this->Permission('Addons.Addon.Manage');
+		// $this->Permission('Addons.Addon.Manage');
 		
 		$this->AddJsFile('/js/library/jquery.autogrow.js');
 		$this->AddJsFile('forms.js');
