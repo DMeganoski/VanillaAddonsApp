@@ -134,7 +134,7 @@ if ($this->DeliveryType() == DELIVERY_TYPE_ALL) {
    }
 		
 	echo Gdn_Format::Html($this->Data('Description'));
-   if ($this->Data('Description2')) {
+   if ($this->Data('Description2') && $Ver != 'v1') {
       echo '<br /><br />', Gdn_Format::Html($this->Data('Description2'));
    }
 	?>
