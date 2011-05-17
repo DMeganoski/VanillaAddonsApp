@@ -629,27 +629,24 @@ class AddonController extends AddonsController {
             $TmpImage = $UploadImage->ValidateUpload('Picture');
             
             // Generate the target image name
-            $TargetImage = $UploadImage->GenerateTargetName(PATH_ROOT . DS . 'uploads', '');
+            $TargetImage = $UploadImage->GenerateTargetName(PATH_LOCAL_UPLOADS, '');
             $ImageBaseName = 'addons/screens/'.pathinfo($TargetImage, PATHINFO_BASENAME);
             
             // Save the uploaded image in large size
             $UploadImage->SaveImageAs(
                $TmpImage,
-               PATH_ROOT.'/uploads/'.ChangeBaseName($ImageBaseName, 'ao%s'),
+               ChangeBaseName($ImageBaseName, 'ao%s'),
                700,
-               1000,
-               FALSE, FALSE
+               1000
             );
 
             // Save the uploaded image in thumbnail size
             $ThumbSize = 150;
             $UploadImage->SaveImageAs(
                $TmpImage,
-               PATH_ROOT.'/uploads/'.ChangeBasename($ImageBaseName, 'at%s'),
+               ChangeBasename($ImageBaseName, 'at%s'),
                $ThumbSize,
-               $ThumbSize,
-               TRUE,
-               FALSE, FALSE
+               $ThumbSize
             );
             
          } catch (Exception $ex) {

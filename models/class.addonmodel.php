@@ -327,6 +327,10 @@ class AddonModel extends Gdn_Model {
       }
    }
 
+   public static function IsReleaseVersion($VersionString) {
+      return !preg_match('`[a-Z]`i', $VersionString);
+   }
+
    public function Save($Stub, $V1 = FALSE) {
       $Session = Gdn::Session();
 

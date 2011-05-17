@@ -9,7 +9,7 @@
 		if ($Session->IsValid()) {
 			echo '<li>'.Anchor('Upload a New Addon', '/addon/add').'</li>';
 		} else {
-			echo '<li>'.Anchor('Sign In', '/entry/?Return=/addons', SignInPopup() ? 'SignInPopup' : '').'</li>';
+			echo '<li>'.Anchor('Sign In', Gdn::Authenticator()->SignInUrl('/addons'), SignInPopup() ? 'SignInPopup' : '').'</li>';
 		}
 	?>
 	</ul>
