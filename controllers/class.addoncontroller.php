@@ -43,13 +43,14 @@ class AddonController extends AddonsController {
          if (!is_array($Addon)) {
             $this->View = 'NotFound';
          } else {
-            $MaxVersion = GetValueR('Versions.0', $Addon);
-            if ($MaxVersion) {
-               $this->SetData('CurrentVersion', GetValue('Version', $MaxVersion));
-            }
-
             $AddonID = $Addon['AddonID'];
             $this->SetData($Addon);
+
+            if ($MaxVersion) {
+               $this->SetData('CurrentVersion', GetValue('Version', $MaxVersion));
+
+            }
+
             $this->AddCssFile('plugins/Voting/design/voting.css');
             $this->AddCssFile('popup.css');
             $this->AddCssFile('fancyzoom.css');

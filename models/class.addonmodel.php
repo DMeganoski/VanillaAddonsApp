@@ -69,8 +69,12 @@ class AddonModel extends Gdn_Model {
          $Type = GetValue('Type', $Addon);
          //$Slug = strtolower(GetValue('AddonKey', $Data).'-'.GetValue('Type', $Data).'-'.GetValue('Version', $Data));
          $Slug = strtolower($Key).'-'.strtolower($Type);
-         if ($IncludeVersion)
+         if ($IncludeVersion === TRUE)
             $Slug .= '-'.GetValue('Version', $Addon, '');
+         elseif (is_string($IncludeVersion))
+            $Slug .= '-'.$IncludeVersion;
+         elseif (is_array($IncludeVersion))
+            $Slug .= '-'.$IncludeVersion['Version'];
          return urlencode($Slug);
       } else {
          return GetValue('AddonID', $Addon).'-'.Gdn_Format::Url(GetValue('Name', $Addon));
@@ -243,23 +247,50 @@ class AddonModel extends Gdn_Model {
     */
    public function GetSlug($Slug, $GetVersions = FALSE) {
       if (is_numeric($Slug)) {
-         $Result = $this->GetID($Slug, $GetVersions);
+         $Addon = $this->GetID($Slug, $GetVersions);
       } else {
          // This is a string identifier for the addon.
          $Parts = explode('-', $Slug, 3);
          $Key = GetValue(0, $Parts);
 
          if (is_numeric($Key)) {
-            $Result = $this->GetID($Key, $GetVersions);
+            $Addon = $this->GetID($Key, $GetVersions);
          } else {
             $Type = strtolower(GetValue(1, $Parts));
             $TypeID = GetValue($Type, self::$Types, 0);
             $Version = GetValue(2, $Parts);
 
-            return $this->GetID(array($Key, $TypeID, $Version), $GetVersions);
+            $Addon = $this->GetID(array($Key, $TypeID, $Version), $GetVersions);
          }
       }
-      return $Result;
+
+      if ($GetVersions) {
+         // Find the latest stable version.
+            $MaxVersion = GetValueR('Versions.0', $Addon);
+            foreach ($Addon['Versions'] as $Version) {
+               if (AddonModel::IsReleaseVersion($Version['Version'])) {
+                  $MaxVersion = $Version;
+                  break;
+               }
+            }
+
+            // Find the version we are looking at.
+            foreach ($Addon['Versions'] as $Version) {
+               $Slug2 = AddonModel::Slug($Addon, $Version);
+               if ($Slug2 == $Slug) {
+                  $ViewingVersion = $Version;
+                  break;
+               }
+            }
+            if (!isset($ViewingVersion))
+               $ViewingVersion = $MaxVersion;
+
+            $Addon['CurrentAddonVersionID'] = $MaxVersion['AddonVersionID'];
+            $Addon = array_merge($Addon, $ViewingVersion);
+            $Addon['Slug'] = AddonModel::Slug($Addon, $ViewingVersion);
+      }
+
+      return $Addon;
    }
 
    public function VersionCompare($A, $B) {
@@ -328,7 +359,7 @@ class AddonModel extends Gdn_Model {
    }
 
    public static function IsReleaseVersion($VersionString) {
-      return !preg_match('`[a-Z]`i', $VersionString);
+      return !preg_match('`[a-z]`i', $VersionString);
    }
 
    public function Save($Stub, $V1 = FALSE) {
