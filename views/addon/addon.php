@@ -80,7 +80,7 @@ if ($this->DeliveryType() == DELIVERY_TYPE_ALL) {
 				</dl>
 			</div>
 			<div class="Box RequirementBox">
-            <h3><?php echo T('Requirements') ?></h3>
+            <h3><?php echo T('Requirements'); ?></h3>
 				<dl>
 					<dt>Vanilla</dt>
 					<dd><span class="Vanilla<?php echo $VanillaVersion; ?>">Vanilla <?php echo $VanillaVersion; ?></span></dd>
@@ -114,6 +114,35 @@ if ($this->DeliveryType() == DELIVERY_TYPE_ALL) {
             }
 				?>
 			</div>
+         <?php 
+         $Versions = (array)$this->Data('Versions');
+         if (count($Versions) > 0):
+         ?>
+         <div class="Box AddonBox VersionsBox">
+            <h3><?php echo T('Latest Versions'); ?></h3>
+            <table class="VersionsTable">
+               <tr>
+                  <th><?php echo T('Version'); ?></th>
+                  <th class="DateColumn"><?php echo T('Released'); ?></th>
+               </tr>
+            <?php
+            $i = 1;
+            foreach ($Versions as $Version) {
+               if ($i > 5)
+                  break;
+               $i++;
+
+               $Url = Url('/addon/'.AddonModel::Slug($this->Data, FALSE).'-'.$Version['Version']);
+
+               echo '<tr>'.
+                  '<td>'.Anchor(htmlspecialchars($Version['Version']), $Url).'</td>'.
+                  '<td class="DateColumn">'.Anchor(htmlspecialchars(Gdn_Format::Date($Version['DateInserted'])), $Url).'</td>'.
+               '</tr>';
+            }
+            ?>
+            </table>
+         </div>
+         <?php endif; ?>
 		</div>
 	<?php
 
@@ -146,13 +175,13 @@ if ($this->DeliveryType() == DELIVERY_TYPE_ALL) {
 			<?php
 			foreach ($this->PictureData->Result() as $Picture) {
             echo '<span class="AddonPicture">';
-				echo '<a rel="popable[gallery]" href="#Pic_'.$Picture->AddonPictureID.'"><img src="'.Url('uploads/'.ChangeBasename($Picture->File, 'at%s')).'" /></a>';
+				echo '<a rel="popable[gallery]" href="#Pic_'.$Picture->AddonPictureID.'"><img src="'.Gdn_Upload::Url(ChangeBasename($Picture->File, 'at%s')).'" /></a>';
 
             if ($Session->CheckPermission('Addon.Addons.Manage')) {
                echo '<a class="Popup DeletePicture" href="'.Url('/addon/deletepicture/'.$Picture->AddonPictureID).'">x</a>';
             }
 
-            echo '<div id="Pic_'.$Picture->AddonPictureID.'" style="display: none;"><img src="'.Url('uploads/'.ChangeBasename($Picture->File, 'ao%s')).'" /></div>';
+            echo '<div id="Pic_'.$Picture->AddonPictureID.'" style="display: none;"><img src="'.Gdn_Upload::Url(ChangeBasename($Picture->File, 'ao%s')).'" /></div>';
 			
             echo '</span>';
          }

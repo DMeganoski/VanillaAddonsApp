@@ -29,7 +29,8 @@ class GetController extends AddonsController {
       }
 
 		// Find the requested addon
-		$this->Addon = $this->AddonModel->GetSlug($ID);
+		$this->Addon = $this->AddonModel->GetSlug($ID, TRUE);
+      $this->SetData('Addon', $this->Addon);
 		
 		if (!is_array($this->Addon) || !GetValue('File', $this->Addon)) {
 			$this->Addon = array(
