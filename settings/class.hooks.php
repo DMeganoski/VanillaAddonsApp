@@ -31,15 +31,10 @@ class AddonsHooks implements Gdn_IPlugin {
    /**
     * Hook for discussion prefixes in /discussions.
     */
-   public function DiscussionsController_BeforeDiscussionName_Handler($Sender) {
-      $this->AddonDiscussionPrefix($Sender);
-   }
-   
-   /**
-    * Hook for discussion prefixes in /categories.
-    */
-   public function CategoriesController_BeforeDiscussionName_Handler($Sender) {
-      $this->AddonDiscussionPrefix($Sender);
+   public function Base_BeforeDiscussionMeta_Handler($Sender, $Args) {
+      if (Gdn::Controller()->ControllerName == 'addoncontroller')
+         return;
+      $this->AddonDiscussionPrefix($Args['Discussion']);
    }
    
    /**
@@ -47,13 +42,13 @@ class AddonsHooks implements Gdn_IPlugin {
     *
     * Ex: [AddonName] Discussion original name
     */
-   public function AddonDiscussionPrefix($Sender) {
-      $Addon = GetValue('Addon', $Sender->EventArguments['Discussion']);
+   public function AddonDiscussionPrefix($Discussion) {
+      $Addon = GetValue('Addon', $Discussion);
       if ($Addon) {
+         $Slug = AddonModel::Slug($Addon, FALSE);
+         $Url = "/addon/$Slug";
          $AddonName = GetValue('Name', $Addon);
-         $DiscussionName =& $Sender->EventArguments['Discussion']->Name;
-         if ($AddonName)
-            $DiscussionName = '[' .Gdn_Format::Html($AddonName).'] '.$DiscussionName;
+         echo Wrap(Anchor(Gdn_Format::Html($AddonName), $Url), 'span', array('class' => 'Tag Tag-Addon'));
       }
    }
    
@@ -77,7 +72,7 @@ class AddonsHooks implements Gdn_IPlugin {
       AddonModel::JoinAddons($Args['Data'], 'AddonID', array('Name', 'Icon', 'AddonKey', 'AddonTypeID', 'Checked'));
    }
    
-   public function DiscussionsController_DiscussionMeta_Handler($Sender, $Args) {
+   public function DiscussionsController_BeforeDiscussionContent_Handler($Sender, $Args) {
       static $AddonModel = NULL;
       if (!$AddonModel) $AddonModel = new AddonModel();
       
@@ -87,9 +82,9 @@ class AddonsHooks implements Gdn_IPlugin {
          $Slug = AddonModel::Slug($Addon, FALSE);
          $Url = "/addon/$Slug";
          if ($Addon['Icon']) {
-            echo Anchor(Img(Gdn_Upload::Url($Addon['Icon']), array('class' => 'Addon-Icon')), $Url);
-         } else {
-            echo Wrap(Anchor('Addon', $Url), 'span', array('class' => 'Tag Tag-Addon'));
+            echo Anchor(Img(Gdn_Upload::Url($Addon['Icon'])), $Url, array('class' => 'Addon-Icon Author'));
+//         } else {
+//            echo Wrap(Anchor('Addon', $Url), 'span', array('class' => 'Tag Tag-Addon'));
          }
       }
    }

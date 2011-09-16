@@ -11,29 +11,25 @@ Contact Vanilla Forums Inc. at support [at] vanillaforums [dot] com
 require_once PATH_APPLICATIONS.'/dashboard/models/class.updatemodel.php';
 
 class AddonModel extends Gdn_Model {
-   public static $Types;
-   public static $TypesPlural;
-
-   protected $_AddonCache = array();
-
-   public function __construct() {
-      parent::__construct('Addon');
-
-      self::$Types = array(
+   public static $Types = array(
           'plugin' => ADDON_TYPE_PLUGIN,
           'theme' => ADDON_TYPE_THEME,
           'locale' => ADDON_TYPE_LOCALE,
           'application' => ADDON_TYPE_APPLICATION,
           'core' => ADDON_TYPE_CORE
       );
-
-      self::$TypesPlural = array(
+   public static $TypesPlural = array(
           'plugins' => ADDON_TYPE_PLUGIN,
           'themes' => ADDON_TYPE_THEME,
           'locales' => ADDON_TYPE_LOCALE,
           'applications' => ADDON_TYPE_APPLICATION,
           'core' => ADDON_TYPE_CORE
       );
+
+   protected $_AddonCache = array();
+
+   public function __construct() {
+      parent::__construct('Addon');
    }
    
    public function AddonQuery($VersionSlug = FALSE) {

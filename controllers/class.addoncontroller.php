@@ -60,8 +60,7 @@ class AddonController extends AddonsController {
             $PictureModel = new Gdn_Model('AddonPicture');
             $this->PictureData = $PictureModel->GetWhere(array('AddonID' => $AddonID));
 				$DiscussionModel = new DiscussionModel();
-				$DiscussionModel->AddonID = $AddonID; // Let the model know we want to filter to a particular addon (we then hook into the model in the addons hooks file).
-				$this->DiscussionData = $DiscussionModel->Get(0, 50);
+            $this->DiscussionData = $DiscussionModel->Get(0, 50, array('AddonID' => $AddonID));
             
             $this->View = 'addon';
 				$this->Title($this->Data('Name').' '.$this->Data('Version').' by '.$this->Data('InsertName'));
