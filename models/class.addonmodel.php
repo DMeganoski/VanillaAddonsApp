@@ -459,14 +459,14 @@ class AddonModel extends Gdn_Model {
       // Save the version.
       if ($AddonID && isset($Path)) {
          $Addon['AddonID'] = $AddonID;
-         if (!StringBeginsWith($Path, PATH_LOCAL_UPLOADS.'/addons/')) {
+         if (!StringBeginsWith($Path, PATH_UPLOADS.'/addons/')) {
             // The addon must be copied into the uploads folder.
-            $NewPath = PATH_LOCAL_UPLOADS.'/addons/'.basename($Path);
+            $NewPath = PATH_UPLOADS.'/addons/'.basename($Path);
             rename($Path, $NewPath);
             $Path = $NewPath;
             $this->_AddonCache = array();
          }
-         $File = substr($Path, strlen(PATH_LOCAL_UPLOADS.'/'));
+         $File = substr($Path, strlen(PATH_UPLOADS.'/'));
          $Addon['File'] = $File;
 
          if ($CurrentVersion) {

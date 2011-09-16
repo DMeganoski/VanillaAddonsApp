@@ -14,13 +14,13 @@ Contact Vanilla Forums Inc. at support [at] vanillaforums [dot] com
 class GetController extends AddonsController {
    
    public $Uses = array('Form', 'Database', 'AddonModel');
-	
+   
    public function Index($ID = '', $ServeFile = '0') {
-		$this->AddJsFile('js/library/jquery.js');
+      $this->AddJsFile('js/library/jquery.js');
 
       // Define the item being downloaded
-		if (strtolower($ID) == 'vanilla')
-			$ID = 'vanilla-core';
+      if (strtolower($ID) == 'vanilla')
+         $ID = 'vanilla-core';
 
       $Ext = strtolower(strrchr($ID, '.'));
       if ($Ext == '.zip') {
@@ -28,28 +28,28 @@ class GetController extends AddonsController {
          $ID = substr($ID, 0, -4);
       }
 
-		// Find the requested addon
-		$this->Addon = $this->AddonModel->GetSlug($ID, TRUE);
+      // Find the requested addon
+      $this->Addon = $this->AddonModel->GetSlug($ID, TRUE);
       $this->SetData('Addon', $this->Addon);
-		
-		if (!is_array($this->Addon) || !GetValue('File', $this->Addon)) {
-			$this->Addon = array(
+      
+      if (!is_array($this->Addon) || !GetValue('File', $this->Addon)) {
+         $this->Addon = array(
             'Name' => 'Not Found',
             'Version' => 'undefined',
             'File' => '');
-		} else {
+      } else {
          $AddonID = $this->Addon['AddonID'];
          if ($ServeFile != '1')
             $this->AddJsFile('get.js');
          
-			if ($ServeFile == '1') {
-				// Record this download
-				$this->Database->SQL()->Insert('Download', array(
-					'AddonID' => $AddonID,
-					'DateInserted' => Gdn_Format::ToDateTime(),
-					'RemoteIp' => @$_SERVER['REMOTE_ADDR']
-				));
-				$this->AddonModel->SetProperty($AddonID, 'CountDownloads', $this->Addon['CountDownloads'] + 1);
+         if ($ServeFile == '1') {
+            // Record this download
+            $this->Database->SQL()->Insert('Download', array(
+               'AddonID' => $AddonID,
+               'DateInserted' => Gdn_Format::ToDateTime(),
+               'RemoteIp' => @$_SERVER['REMOTE_ADDR']
+            ));
+            $this->AddonModel->SetProperty($AddonID, 'CountDownloads', $this->Addon['CountDownloads'] + 1);
 
             if (GetValue('Slug', $this->Addon))
                $Filename = $this->Addon['Slug'];
@@ -57,12 +57,17 @@ class GetController extends AddonsController {
                $Filename = "{$this->Addon['Name']}-{$this->Addon['Version']}";
 
             $Filename = Gdn_Format::Url($Filename).'.zip';
+            $TargetFile = PATH_UPLOADS.'/'.$this->Addon['File'];
             
-				Gdn_FileSystem::ServeFile(PATH_LOCAL_UPLOADS.'/'.$this->Addon['File'], $Filename);
-			}
-		}
-		
-		$this->AddModule('AddonHelpModule');		
+            $this->EventArguments['TargetFile'] = &$TargetFile;
+            $this->EventArguments['Filename'] = &$Filename;
+            $this->FireEvent('BeforeServeFile');
+            
+            Gdn_FileSystem::ServeFile($TargetFile, $Filename);
+         }
+      }
+      
+      $this->AddModule('AddonHelpModule');      
       $this->Render();
    }
 }

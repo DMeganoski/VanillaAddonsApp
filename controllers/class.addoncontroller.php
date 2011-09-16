@@ -216,7 +216,7 @@ class AddonController extends AddonsController {
          throw NotFoundException('Addon');
 
       // Get the data for the most recent version of the addon.
-      $Path = PATH_LOCAL_UPLOADS.'/'.$Addon['File'];
+      $Path = PATH_UPLOADS.'/'.$Addon['File'];
       
       $AddonData = ArrayTranslate((array)$Addon, array('AddonID', 'AddonKey', 'Name', 'Type', 'Description', 'Requirements', 'Checked'));
       try {
@@ -234,7 +234,7 @@ class AddonController extends AddonsController {
       $Versions = array();
       foreach ($Addon['Versions'] as $Version) {
          $Version = $Version;
-         $Path = PATH_LOCAL_UPLOADS."/{$Version['File']}";
+         $Path = PATH_UPLOADS."/{$Version['File']}";
 
          try {
             $VersionData = ArrayTranslate((array)$Version, array('AddonVersionID', 'Version', 'AddonKey', 'Name', 'MD5', 'FileSize', 'Checked'));
