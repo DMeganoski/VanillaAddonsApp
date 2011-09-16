@@ -46,10 +46,9 @@ class AddonController extends AddonsController {
             $AddonID = $Addon['AddonID'];
             $this->SetData($Addon);
 
-            if ($MaxVersion) {
-               $this->SetData('CurrentVersion', GetValue('Version', $MaxVersion));
-
-            }
+//            if ($MaxVersion) {
+//               $this->SetData('CurrentVersion', GetValue('Version', $MaxVersion));
+//            }
 
             $this->AddCssFile('plugins/Voting/design/voting.css');
             $this->AddCssFile('popup.css');

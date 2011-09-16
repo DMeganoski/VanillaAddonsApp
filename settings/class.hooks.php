@@ -15,18 +15,18 @@ class AddonsHooks implements Gdn_IPlugin {
     *
     * Note: AddonID is manually added to DiscussionModel before Get() in AddonController.
     */
-   public function DiscussionModel_BeforeGet_Handler($Sender) {
-      $AddonID = GetValue('AddonID', $Sender);
-      if (is_numeric($AddonID) && $AddonID > 0) {
-         // Filter discussion list to a particular AddonID if present in model
-         $Sender->SQL->Where('AddonID', $AddonID);
-      }
-      else { 
-         // Make Addon name available on discussions list
-         $Sender->SQL->Select('ad.Name', '', 'AddonName')
-            ->Join('Addon ad', 'd.AddonID = ad.AddonID', 'left');
-      }
-   }
+//   public function DiscussionModel_BeforeGet_Handler($Sender) {
+//      $AddonID = GetValue('AddonID', $Sender);
+//      if (is_numeric($AddonID) && $AddonID > 0) {
+//         // Filter discussion list to a particular AddonID if present in model
+//         $Sender->SQL->Where('AddonID', $AddonID);
+//      }
+//      else { 
+//         // Make Addon name available on discussions list
+//         $Sender->SQL->Select('ad.Name', '', 'AddonName')
+//            ->Join('Addon ad', 'd.AddonID = ad.AddonID', 'left');
+//      }
+//   }
    
    /**
     * Hook for discussion prefixes in /discussions.
@@ -48,12 +48,12 @@ class AddonsHooks implements Gdn_IPlugin {
     * Ex: [AddonName] Discussion original name
     */
    public function AddonDiscussionPrefix($Sender) {
-      $AddonID = GetValue('AddonID', $Sender->EventArguments['Discussion']);
-      if (is_numeric($AddonID) && $AddonID > 0) {
-         $AddonName = GetValue('AddonName', $Sender->EventArguments['Discussion']);
+      $Addon = GetValue('Addon', $Sender->EventArguments['Discussion']);
+      if ($Addon) {
+         $AddonName = GetValue('Name', $Addon);
          $DiscussionName =& $Sender->EventArguments['Discussion']->Name;
-         if ($AddonName != '')
-            $DiscussionName = '[' .htmlspecialchars($AddonName).'] '.$DiscussionName;
+         if ($AddonName)
+            $DiscussionName = '[' .Gdn_Format::Html($AddonName).'] '.$DiscussionName;
       }
    }
    
@@ -65,6 +65,31 @@ class AddonsHooks implements Gdn_IPlugin {
          $Data = Gdn::Database()->SQL()->Select('Name')->From('Addon')->Where('AddonID', $AddonID)->Get()->FirstRow();
          if ($Data) {
             echo '<div class="Warning">'.sprintf(T('This discussion is related to the %s addon.'), Anchor($Data->Name, 'addon/'.$AddonID.'/'.Gdn_Format::Url($Data->Name))).'</div>';
+         }
+      }
+   }
+   
+   /**
+    *
+    * @param DiscussionsController $Sender
+    */
+   public function DiscussionModel_AfterAddColumns_Handler($Sender, $Args) {
+      AddonModel::JoinAddons($Args['Data'], 'AddonID', array('Name', 'Icon', 'AddonKey', 'AddonTypeID', 'Checked'));
+   }
+   
+   public function DiscussionsController_DiscussionMeta_Handler($Sender, $Args) {
+      static $AddonModel = NULL;
+      if (!$AddonModel) $AddonModel = new AddonModel();
+      
+      $Discussion = $Args['Discussion'];
+      $Addon = GetValue('Addon', $Discussion);
+      if ($Addon) {
+         $Slug = AddonModel::Slug($Addon, FALSE);
+         $Url = "/addon/$Slug";
+         if ($Addon['Icon']) {
+            echo Anchor(Img(Gdn_Upload::Url($Addon['Icon']), array('class' => 'Addon-Icon')), $Url);
+         } else {
+            echo Wrap(Anchor('Addon', $Url), 'span', array('class' => 'Tag Tag-Addon'));
          }
       }
    }

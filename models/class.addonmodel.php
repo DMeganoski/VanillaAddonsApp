@@ -62,11 +62,20 @@ class AddonModel extends Gdn_Model {
          $this->SQL->Join('AddonVersion v', $On, 'left');
       }
    }
+   
+   public static function JoinAddons(&$Data, $Field = 'AddonID', $Columns = array('Name')) {
+      $Columns = array_merge(array('table' => 'Addon', 'column' => 'Addon'), $Columns);
+      Gdn_DataSet::Join($Data, $Columns, array('unique' => TRUE));
+   }
 
    public static function Slug($Addon, $IncludeVersion = TRUE) {
-      if (GetValue('AddonKey', $Addon) && GetValue('Version', $Addon)) {
+      if (GetValue('AddonKey', $Addon) && (GetValue('Version', $Addon) || !$IncludeVersion)) {
          $Key = GetValue('AddonKey', $Addon);
          $Type = GetValue('Type', $Addon);
+         if (!$Type) {
+            $Type = GetValue(GetValue('AddonTypeID', $Addon), array_flip(self::$Types));
+         }
+         
          //$Slug = strtolower(GetValue('AddonKey', $Data).'-'.GetValue('Type', $Data).'-'.GetValue('Version', $Data));
          $Slug = strtolower($Key).'-'.strtolower($Type);
          if ($IncludeVersion === TRUE)
