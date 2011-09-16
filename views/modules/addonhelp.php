@@ -32,5 +32,5 @@
 
 <div class="Box DownloadPanelBox">
 	<h4>Don't have Vanilla yet?</h4>
-	<?php echo Anchor('Get Vanilla Now', '/download', 'BigButton'); ?>
+	<?php echo Anchor('Get Vanilla Now', '/download', 'Button BigButton'); ?>
 </div>

@@ -53,7 +53,7 @@ class AddonsHooks implements Gdn_IPlugin {
          $AddonName = GetValue('AddonName', $Sender->EventArguments['Discussion']);
          $DiscussionName =& $Sender->EventArguments['Discussion']->Name;
          if ($AddonName != '')
-            $DiscussionName = '[' . htmlentities($AddonName) . '] ' . $DiscussionName;
+            $DiscussionName = '[' . $AddonName . '] ' . $DiscussionName;
       }
    }
    

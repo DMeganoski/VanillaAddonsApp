@@ -32,7 +32,7 @@ if ($this->DeliveryType() == DELIVERY_TYPE_ALL) {
 		echo '|'.Anchor('Upload Icon', '/addon/icon/'.$AddonID, 'Popup');
       if ($Session->CheckPermission('Addons.Addon.Manage'))
          echo '|'.Anchor('Check', '/addon/check/'.$AddonID);
-		if ($Session->CheckPermission('Addons.Addon.Approve'))
+		if ($Session->CheckPermission('Addons.Addon.Manage'))
 			echo '|'.Anchor($this->Data('DateReviewed') == '' ? 'Approve Version' : 'Unapprove Version', '/addon/approve/'.$AddonID, 'ApproveAddon');
 		if ($Session->CheckPermission('Addons.Addon.Manage'))
          echo '|'.Anchor('Delete Addon', '/addon/delete/'.$AddonID.'?Target=/addon', 'DeleteAddon');
@@ -50,7 +50,7 @@ if ($this->DeliveryType() == DELIVERY_TYPE_ALL) {
 	<div class="Legal">
 		<div class="DownloadPanel">
 			<div class="Box DownloadBox">
-				<p><?php echo Anchor('Download Now', '/get/'.($this->Data('Slug') ? urlencode($this->Data('Slug')) : $AddonID), 'BigButton'); ?></p>
+				<p><?php echo Anchor('Download Now', '/get/'.($this->Data('Slug') ? urlencode($this->Data('Slug')) : $AddonID), 'Button BigButton'); ?></p>
 				<dl>
 					<dt>Author</dt>
 					<dd><?php echo Anchor($this->Data('InsertName'), '/profile/'.urlencode($this->Data('InsertName'))); ?></dd>
