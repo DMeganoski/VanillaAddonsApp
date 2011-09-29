@@ -81,11 +81,11 @@ class AddonsHooks implements Gdn_IPlugin {
       if ($Addon) {
          $Slug = AddonModel::Slug($Addon, FALSE);
          $Url = "/addon/$Slug";
-         if ($Addon['Icon']) {
-            echo Anchor(Img(Gdn_Upload::Url($Addon['Icon'])), $Url, array('class' => 'Addon-Icon Author'));
+//         if ($Addon['Icon']) {
+//            echo Anchor(Img(Gdn_Upload::Url($Addon['Icon'])), $Url, array('class' => 'Addon-Icon Author'));
 //         } else {
 //            echo Wrap(Anchor('Addon', $Url), 'span', array('class' => 'Tag Tag-Addon'));
-         }
+//         }
       }
    }
    
@@ -104,6 +104,29 @@ class AddonsHooks implements Gdn_IPlugin {
          $FormPostValues['AddonID'] = $AddonID;
          $Sender->EventArguments['FormPostValues'] = $FormPostValues;
       }
+   }
+   
+   public function DiscussionModel_BeforeNotification_Handler($Sender, $Args) {
+      $Discussion = $Args['Discussion'];
+      if (!GetValue('AddonID', $Discussion))
+         return;
+      
+      $AddonModel = new AddonModel();
+      $Addon = $AddonModel->GetID($Discussion['AddonID'], DATASET_TYPE_ARRAY);
+      
+      if (GetValue('InsertUserID', $Addon) == Gdn::Session()->UserID)
+         return;
+      
+      $ActivityModel = $Args['ActivityModel'];
+      $ActivityID = $ActivityModel->Add(
+         $Discussion['InsertUserID'],
+         'AddonComment',
+         Gdn_Format::Text(Gdn_Format::To($Discussion['Body'], $Discussion['Format'])),
+         $Addon['InsertUserID'],
+         '',
+         '/discussion/'.$Discussion['DiscussionID'].'/'.Gdn_Format::Url($Discussion['Name']),
+         'QueueOnly'
+      );
    }
    
    // Make sure that all translations are in the GDN_Translation table for the "source" language
@@ -147,8 +170,7 @@ class AddonsHooks implements Gdn_IPlugin {
    }
    
    public function ProfileController_AfterPreferencesDefined_Handler(&$Sender) {
-      $Sender->Preferences['Email Notifications']['Email.AddonComment'] = T('Notify me when people comment on my addons.');
-      $Sender->Preferences['Email Notifications']['Email.AddonCommentMention'] = T('Notify me when people mention me in addon comments.');
+      $Sender->Preferences['Notifications']['Email.AddonComment'] = T('Notify me when people comment on my addons.');
    }
    
    /**

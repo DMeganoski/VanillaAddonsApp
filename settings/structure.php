@@ -185,15 +185,8 @@ if ($SQL->GetWhere('ActivityType', array('Name' => 'AddAddon'))->NumRows() == 0)
 if ($SQL->GetWhere('ActivityType', array('Name' => 'EditAddon'))->NumRows() == 0)
    $SQL->Insert('ActivityType', array('AllowComments' => '0', 'Name' => 'EditAddon', 'FullHeadline' => '%1$s edited an %8$s.', 'ProfileHeadline' => '%1$s edited an %8$s.', 'RouteCode' => 'addon', 'Public' => '1'));
 
-/*
 // People's comments on addons
-if ($SQL->GetWhere('ActivityType', array('Name' => 'AddonComment'))->NumRows() == 0)
-   $SQL->Insert('ActivityType', array('AllowComments' => '0', 'Name' => 'AddonComment', 'FullHeadline' => '%1$s commented on %4$s %8$s.', 'ProfileHeadline' => '%1$s commented on %4$s %8$s.', 'RouteCode' => 'addon', 'Notify' => '1', 'Public' => '1'));
-
-// People mentioning others in addon comments
-if ($SQL->GetWhere('ActivityType', array('Name' => 'AddonCommentMention'))->NumRows() == 0)
-   $SQL->Insert('ActivityType', array('AllowComments' => '0', 'Name' => 'AddonCommentMention', 'FullHeadline' => '%1$s mentioned %3$s in a %8$s.', 'ProfileHeadline' => '%1$s mentioned %3$s in a %8$s.', 'RouteCode' => 'comment', 'Notify' => '1', 'Public' => '0'));
-*/
+$SQL->Replace('ActivityType', array('AllowComments' => '0', 'FullHeadline' => '%1$s asked a %8$s about %4$s addon.', 'ProfileHeadline' => '%1$s asked a %8$s about %4$s addon.', 'RouteCode' => 'question', 'Notify' => '1', 'Public' => '0'), array('Name' => 'AddonComment'), TRUE);
 
 // People adding new language definitions
 if ($SQL->GetWhere('ActivityType', array('Name' => 'AddUserLanguage'))->NumRows() == 0)

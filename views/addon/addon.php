@@ -21,11 +21,10 @@ if ($this->DeliveryType() == DELIVERY_TYPE_ALL) {
 	</h1>
 	<?php
    $AddonID = $this->Data('AddonID');
+   $Ver = ($this->Data('Checked') ? '' : 'v1');
+   $Ver2 = ($this->Data('Checked') || $this->Data('Vanilla2') ? '' : 'v1');
 	if ($Session->UserID == $this->Data('InsertUserID') || $Session->CheckPermission('Addons.Addon.Manage')) {
-      $Ver = ($this->Data('Checked') ? '' : 'v1');
-      $Ver2 = ($this->Data('Checked') || $this->Data('Vanilla2') ? '' : 'v1');
-
-		echo '<div class="AddonOptions">';
+      echo '<div class="AddonOptions">';
 		echo Anchor('Edit Details', "/addon/edit{$Ver}/$AddonID", 'Popup');
 		echo '|'.Anchor('Upload New Version', "/addon/newversion{$Ver2}/$AddonID", 'Popup');
 		echo '|'.Anchor('Upload Screen', '/addon/addpicture/'.$AddonID, 'Popup');
@@ -143,6 +142,15 @@ if ($this->DeliveryType() == DELIVERY_TYPE_ALL) {
             </table>
          </div>
          <?php endif; ?>
+         
+         <?php
+         if ($Session->IsValid()) {
+            echo Anchor('Ask a Question', 'post/discussion?AddonID='.$AddonID, 'BigButton');
+         } else {
+            echo Anchor('Sign In', '/entry/?Target='.urlencode($this->SelfUrl), 'BigButton'.(SignInPopup() ? ' SignInPopup' : ''));
+         }
+
+         ?>
 		</div>
 	<?php
 
@@ -190,14 +198,8 @@ if ($this->DeliveryType() == DELIVERY_TYPE_ALL) {
 		<?php
 	}
 	?>
-	<h2 class="Questions">Questions
-	<?php
-	if ($Session->IsValid()) {
-		echo Anchor('Ask a Question', 'post/discussion?AddonID='.$AddonID, 'TabLink');
-	} else {
-		echo Anchor('Sign In', '/entry/?Target='.urlencode($this->SelfUrl), 'TabLink'.(SignInPopup() ? ' SignInPopup' : ''));
-	}
-	?></h2>
+	<h2 class="Questions" style="position:relative;">Questions</h2>
+<div style="clear: both"></div>
 	<?php if (is_object($this->DiscussionData) && $this->DiscussionData->NumRows() > 0) { ?>
 	<ul class="DataList Discussions">
 		<?php
