@@ -26,9 +26,9 @@ if ($this->DeliveryType() == DELIVERY_TYPE_ALL) {
 	if ($Session->UserID == $this->Data('InsertUserID') || $Session->CheckPermission('Addons.Addon.Manage')) {
       echo '<div class="AddonOptions">';
 		echo Anchor('Edit Details', "/addon/edit{$Ver}/$AddonID", 'Popup');
-		echo '|'.Anchor('Upload New Version', "/addon/newversion{$Ver2}/$AddonID", 'Popup');
-		echo '|'.Anchor('Upload Screen', '/addon/addpicture/'.$AddonID, 'Popup');
-		echo '|'.Anchor('Upload Icon', '/addon/icon/'.$AddonID, 'Popup');
+		echo '|'.Anchor('Upload New Version', "/addon/newversion{$Ver2}/$AddonID");
+		echo '|'.Anchor('Upload Screen', '/addon/addpicture/'.$AddonID);
+		echo '|'.Anchor('Upload Icon', '/addon/icon/'.$AddonID);
       if ($Session->CheckPermission('Addons.Addon.Manage'))
          echo '|'.Anchor('Check', '/addon/check/'.$AddonID);
 		if ($Session->CheckPermission('Addons.Addon.Manage'))
