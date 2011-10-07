@@ -11,7 +11,7 @@ echo $this->Form->Errors();
 ?>
 <ul>
 	<li>
-		<?php echo $this->Form->Label('Choose Icon (2mb max)', 'Icon'); ?>
+		<h3><?php echo $this->Form->Label('Choose Icon (2mb max)', 'Icon'); ?></h3>
 		<?php echo $this->Form->Input('Icon', 'file', array('class' => 'File')); ?>
 	</li>
 </ul>

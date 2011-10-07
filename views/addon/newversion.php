@@ -12,7 +12,7 @@ if ($this->DeliveryType() == DELIVERY_TYPE_ALL)
 ?>
 <ul>
 	<li>
-		<?php echo $this->Form->Label('File to Upload (2mb max)', 'File'); ?>
+		<h3><?php echo $this->Form->Label('File to Upload (2mb max)', 'File'); ?></h3>
 		<?php echo $this->Form->Input('File', 'file', array('class' => 'File')); ?>
 	</li>
 	<!--<li>

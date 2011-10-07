@@ -12,7 +12,7 @@ echo $this->Form->Errors();
 ?>
 <ul>
 	<li>
-		<?php echo $this->Form->Label('Picture to Upload (2mb max)', 'Picture'); ?>
+		<h3><?php echo $this->Form->Label('Picture to Upload (2mb max)', 'Picture'); ?></h3>
 		<?php echo $this->Form->Input('Picture', 'file', array('class' => 'File')); ?>
 	</li>
 </ul>
