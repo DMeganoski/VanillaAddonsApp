@@ -92,6 +92,7 @@ class AddonController extends AddonsController {
       $this->Permission('Addons.Addon.Add');
       $this->AddJsFile('/js/library/jquery.autogrow.js');
       $this->AddJsFile('forms.js');
+      $this->AddModule('AddonHelpModule', 'Panel');
 
       $this->Form->SetModel($this->AddonModel);
 
@@ -343,6 +344,8 @@ class AddonController extends AddonsController {
       if ($Addon['InsertUserID'] != $Session->UserID)
          $this->Permission('Addons.Addon.Manage');
 
+      $this->AddModule('AddonHelpModule');
+      
       $this->Form->SetModel($this->AddonModel);
       $this->Form->AddHidden('AddonID', $AddonID);
       
@@ -617,7 +620,8 @@ class AddonController extends AddonsController {
 
       if ($Session->UserID != $Addon['InsertUserID'])
 			$this->Permission('Addons.Addon.Manage');
-         
+      
+      $this->AddModule('AddonHelpModule', 'Panel');
       $AddonPictureModel = new Gdn_Model('AddonPicture');
       $this->Form->SetModel($AddonPictureModel);
       $this->Form->AddHidden('AddonID', $AddonID);
@@ -704,6 +708,7 @@ class AddonController extends AddonsController {
       if ($Session->UserID != $Addon['InsertUserID'])
 			$this->Permission('Addons.Addon.Manage');
 
+      $this->AddModule('AddonHelpModule', 'Panel');
       $this->Form->SetModel($this->AddonModel);
       $this->Form->AddHidden('AddonID', $AddonID);
       if ($this->Form->AuthenticatedPostBack() === TRUE) {
