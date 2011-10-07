@@ -22,10 +22,13 @@ class GetController extends AddonsController {
       if (strtolower($ID) == 'vanilla')
          $ID = 'vanilla-core';
 
-      $Ext = strtolower(strrchr($ID, '.'));
+      $UrlFilename = Gdn::Request()->Filename();
+      $PathInfo = pathinfo($UrlFilename);
+      
+      $Ext = GetValue('extension', $PathInfo);
       if ($Ext == '.zip') {
          $ServeFile = '1';
-         $ID = substr($ID, 0, -4);
+         $ID = $Ext = GetValue('filename', $PathInfo);
       }
 
       // Find the requested addon
