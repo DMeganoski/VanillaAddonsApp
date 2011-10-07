@@ -1,10 +1,11 @@
 jQuery(document).ready(function($) {
    setTimeout(function() {
-      var loc = location.href;
-      if (loc.substring(0,-4) != '.zip')
-         loc += '.';
-
-      loc += 'zip';
-      document.location.replace(loc);
-   }, 3000);
+      var Location = location.href;
+      var StubLength = Location.length;
+      var StubExtension = Location.substring(StubLength - 4,StubLength);
+      if (StubExtension != '.zip') {
+         Location += '.zip';
+         document.location.replace(Location);
+      }
+   }, 1000);
 });

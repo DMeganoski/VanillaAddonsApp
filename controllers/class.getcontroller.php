@@ -26,7 +26,7 @@ class GetController extends AddonsController {
       $PathInfo = pathinfo($UrlFilename);
       
       $Ext = GetValue('extension', $PathInfo);
-      if ($Ext == '.zip') {
+      if ($Ext == 'zip') {
          $ServeFile = '1';
          $ID = $Ext = GetValue('filename', $PathInfo);
       }
