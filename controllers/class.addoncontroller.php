@@ -628,7 +628,7 @@ class AddonController extends AddonsController {
             $TmpImage = $UploadImage->ValidateUpload('Picture');
             
             // Generate the target image name
-            $TargetImage = $UploadImage->GenerateTargetName(PATH_LOCAL_UPLOADS, '');
+            $TargetImage = $UploadImage->GenerateTargetName(PATH_UPLOADS, '');
             $ImageBaseName = 'addons/screens/'.pathinfo($TargetImage, PATHINFO_BASENAME);
             
             // Save the uploaded image in large size
