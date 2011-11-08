@@ -48,7 +48,7 @@ class AddonsHooks implements Gdn_IPlugin {
          $Slug = AddonModel::Slug($Addon, FALSE);
          $Url = "/addon/$Slug";
          $AddonName = GetValue('Name', $Addon);
-         echo Wrap(Anchor(Gdn_Format::Html($AddonName), $Url), 'span', array('class' => 'Tag Tag-Addon'));
+         echo ' '.Wrap(Anchor(Gdn_Format::Html($AddonName), $Url), 'span', array('class' => 'Tag Tag-Addon')).' ';
       }
    }
    
@@ -130,7 +130,7 @@ class AddonsHooks implements Gdn_IPlugin {
    }
    
    // Make sure that all translations are in the GDN_Translation table for the "source" language
-   public function Gdn_Locale_BeforeTranslate_Handler(&$Sender) {
+   public function Gdn_Locale_BeforeTranslate_Handler($Sender) {
       $Code = ArrayValue('Code', $Sender->EventArguments, '');
       if ($Code != '' && !in_array($Code, $this->GetTranslations())) {
          $Session = Gdn::Session();
@@ -149,7 +149,7 @@ class AddonsHooks implements Gdn_IPlugin {
    }
 
    private $_EnabledApplication = 'Vanilla';   
-   public function Gdn_Dispatcher_AfterEnabledApplication_Handler(&$Sender) {
+   public function Gdn_Dispatcher_AfterEnabledApplication_Handler($Sender) {
       $this->_EnabledApplication = ArrayValue('EnabledApplication', $Sender->EventArguments, 'Vanilla'); // Defaults to "Vanilla"
    }
    private function _EnabledApplication() {
@@ -169,7 +169,7 @@ class AddonsHooks implements Gdn_IPlugin {
       return $this->_Translations;
    }
    
-   public function ProfileController_AfterPreferencesDefined_Handler(&$Sender) {
+   public function ProfileController_AfterPreferencesDefined_Handler($Sender) {
       $Sender->Preferences['Notifications']['Email.AddonComment'] = T('Notify me when people comment on my addons.');
    }
    
@@ -181,7 +181,7 @@ class AddonsHooks implements Gdn_IPlugin {
     * 
     * @param object $Sender ProfileController.
     */ 
-   public function ProfileController_AddProfileTabs_Handler(&$Sender) {
+   public function ProfileController_AddProfileTabs_Handler($Sender) {
       if (is_object($Sender->User) && $Sender->User->UserID > 0) {
          $Sender->AddProfileTab(T('Addons'), 'profile/addons/'.$Sender->User->UserID.'/'.urlencode($Sender->User->Name));
          // Add the discussion tab's CSS and Javascript
@@ -197,7 +197,7 @@ class AddonsHooks implements Gdn_IPlugin {
 	 *
 	 * @param object $Sender ProfileController.
 	 */
-   public function ProfileController_Addons_Create(&$Sender) {
+   public function ProfileController_Addons_Create($Sender) {
       $UserReference = ArrayValue(0, $Sender->RequestArgs, '');
 		$Username = ArrayValue(1, $Sender->RequestArgs, '');
       // $Offset = ArrayValue(2, $Sender->RequestArgs, 0);
