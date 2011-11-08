@@ -467,7 +467,7 @@ class AddonModel extends Gdn_Model {
          if (!StringBeginsWith($Path, PATH_UPLOADS.'/addons/')) {
             // The addon must be copied into the uploads folder.
             $NewPath = PATH_UPLOADS.'/addons/'.basename($Path);
-            rename($Path, $NewPath);
+            //rename($Path, $NewPath);
             $Path = $NewPath;
             $this->_AddonCache = array();
          }
