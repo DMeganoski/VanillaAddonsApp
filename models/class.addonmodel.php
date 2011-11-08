@@ -268,6 +268,9 @@ class AddonModel extends Gdn_Model {
             $Addon = $this->GetID(array($Key, $TypeID, $Version), $GetVersions);
          }
       }
+      
+      if (!$Addon)
+         return FALSE;
 
       if ($GetVersions) {
          // Find the latest stable version.
