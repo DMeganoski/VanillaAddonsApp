@@ -45,6 +45,11 @@ class AddonController extends AddonsController {
          } else {
             $AddonID = $Addon['AddonID'];
             $this->SetData($Addon);
+            
+            $Description = GetValue('Description', $Addon);
+            if ($Description) {
+               $this->Head->AddTag('meta', array('name' => 'description', 'content' => Gdn_Format::PlainText($Description, FALSE)));
+            }
 
 //            if ($MaxVersion) {
 //               $this->SetData('CurrentVersion', GetValue('Version', $MaxVersion));
