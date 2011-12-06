@@ -5,16 +5,7 @@ include($this->FetchViewLocation('helper_functions'));
 if ($this->DeliveryType() == DELIVERY_TYPE_ALL) {
    echo $this->FetchView('head');
 ?>
-   <h2>Browse <?php
-      if ($this->Filter == 'themes')
-         echo 'Themes';
-      elseif ($this->Filter == 'plugins')
-         echo 'Plugins';
-      elseif ($this->Filter == 'applications')
-         echo 'Applications';
-      else
-         echo 'Addons';
-   ?></h2>
+   <h1><?php echo $this->Data('Title'); ?></h1>
    <ul class="DataList Addons">
       <?php
       if ($this->Data('Addons')->NumRows() == 0)

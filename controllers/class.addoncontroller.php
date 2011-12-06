@@ -55,13 +55,10 @@ class AddonController extends AddonsController {
 //               $this->SetData('CurrentVersion', GetValue('Version', $MaxVersion));
 //            }
 
-            $this->AddCssFile('plugins/Voting/design/voting.css');
             $this->AddCssFile('popup.css');
             $this->AddCssFile('fancyzoom.css');
             $this->AddJsFile('fancyzoom.js');
-   			$this->AddJsFile('/js/library/jquery.gardenmorepager.js');
             $this->AddJsFile('addon.js');
-            $this->AddJsFile('plugins/Voting/voting.js');
             $PictureModel = new Gdn_Model('AddonPicture');
             $this->PictureData = $PictureModel->GetWhere(array('AddonID' => $AddonID));
 				$DiscussionModel = new DiscussionModel();
@@ -544,6 +541,17 @@ class AddonController extends AddonsController {
       list($Offset, $Limit) = OffsetLimit($Page, Gdn::Config('Garden.Search.PerPage', 20));
 		
       $this->Filter = $FilterToType;
+      
+      if ($this->Filter == 'themes')
+         $Title = 'Browse Themes';
+      elseif ($this->Filter == 'plugins')
+         $Title = 'Browse Plugins';
+      elseif ($this->Filter == 'applications')
+         $Title = 'Browse Applications';
+      else
+         $Title = 'Browse Addons';
+      $this->SetData('Title', $Title);
+      
 		$Search = GetIncomingValue('Form/Keywords', '');
 		$this->_BuildBrowseWheres($Search);
 				
@@ -564,7 +572,7 @@ class AddonController extends AddonsController {
 			$Offset,
 			$Limit,
 			$NumResults,
-			'addon/browse/'.$FilterToType.'/'.$Sort.'/'.$this->Version.'/%1$s/?Form/Keywords='.Gdn_Format::Url($Search)
+			'addon/browse/'.$FilterToType.'/'.$Sort.'/'.$this->Version.'/%1$s/?Form/Keywords='.urlencode($Search)
 		);
 		$this->SetData('_Pager', $Pager);
       
