@@ -454,6 +454,19 @@ class AddonModel extends Gdn_Model {
       $Fields = $this->FilterSchema($Addon);
       if ($Insert) {
          $AddonID = $this->SQL->Insert($this->Name, $Fields);
+         
+         // Add the activity.
+         $ActivityModel = new ActivityModel();
+         $Activity = array(
+             'ActivityType' => 'Addon',
+             'ActivityUserID' => $Fields['InsertUserID'],
+             'NotifyUserID' => ActivityModel::NOTIFY_PUBLIC,
+             'HeadlineFormat' => '{ActivityUserID,user} added the <a href="{Url,html}">{Data.Name}</a> addon.',
+             'Story' => Gdn_Format::Html($Fields['Description']),
+             'Route' => '/addon/'.rawurlencode(self::Slug($Fields, FALSE)),
+             'Data' => array('Name' => $Fields['Name'])
+         );
+         $ActivityModel->Save($Activity);
       } else {
          $AddonID = GetValue('AddonID', $CurrentAddon);
 

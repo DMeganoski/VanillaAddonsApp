@@ -108,6 +108,8 @@ class AddonsHooks implements Gdn_IPlugin {
    
    public function DiscussionModel_BeforeNotification_Handler($Sender, $Args) {
       $Discussion = $Args['Discussion'];
+      $Activity = $Args['Activity'];
+      
       if (!GetValue('AddonID', $Discussion))
          return;
       
@@ -118,15 +120,12 @@ class AddonsHooks implements Gdn_IPlugin {
          return;
       
       $ActivityModel = $Args['ActivityModel'];
-      $ActivityID = $ActivityModel->Add(
-         $Discussion['InsertUserID'],
-         'AddonComment',
-         Gdn_Format::Text(Gdn_Format::To($Discussion['Body'], $Discussion['Format'])),
-         $Addon['InsertUserID'],
-         '',
-         '/discussion/'.$Discussion['DiscussionID'].'/'.Gdn_Format::Url($Discussion['Name']),
-         'QueueOnly'
-      );
+      $Activity['NotifyUserID'] = $Addon['InsertUserID'];
+      $Activity['HeadlineFormat'] = '{ActivityUserID,user} asked a <a href="{Url,html}">question</a> about the <a href="{Data.AddonUrl,exurl}">{Data.AddonName,html}</a> addon.';
+      $Activity['Data']['AddonName'] = $Addon['Name'];
+      $Activity['Data']['AddonUrl'] = '/addon/'.urlencode(AddonModel::Slug($Addon, FALSE));
+      
+      $ActivityModel->Queue($Activity, 'AddonComment');
    }
    
    // Make sure that all translations are in the GDN_Translation table for the "source" language
@@ -170,6 +169,7 @@ class AddonsHooks implements Gdn_IPlugin {
    }
    
    public function ProfileController_AfterPreferencesDefined_Handler($Sender) {
+      $Sender->Preferences['Notifications']['Popup.AddonComment'] = T('Notify me when people comment on my addons.');
       $Sender->Preferences['Notifications']['Email.AddonComment'] = T('Notify me when people comment on my addons.');
    }
    

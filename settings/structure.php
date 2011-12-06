@@ -164,37 +164,8 @@ if (isset($$PermissionTableExists) && $PermissionTableExists) {
       ));
 }
 
-// Make sure that User.Permissions is blank so new permissions for users get applied.
-//$SQL->Update('User', array('Permissions' => ''))->Put(); // done in PermissionModel::Save()
-
-// Insert some activity types
-///  %1 = ActivityName
-///  %2 = ActivityName Possessive
-///  %3 = RegardingName
-///  %4 = RegardingName Possessive
-///  %5 = Link to RegardingName's Wall
-///  %6 = his/her
-///  %7 = he/she
-///  %8 = RouteCode & Route
-
-// X added an addon
-if ($SQL->GetWhere('ActivityType', array('Name' => 'AddAddon'))->NumRows() == 0)
-   $SQL->Insert('ActivityType', array('AllowComments' => '0', 'Name' => 'AddAddon', 'FullHeadline' => '%1$s uploaded a new %8$s.', 'ProfileHeadline' => '%1$s uploaded a new %8$s.', 'RouteCode' => 'addon', 'Public' => '1'));
-   
-// X edited an addon
-if ($SQL->GetWhere('ActivityType', array('Name' => 'EditAddon'))->NumRows() == 0)
-   $SQL->Insert('ActivityType', array('AllowComments' => '0', 'Name' => 'EditAddon', 'FullHeadline' => '%1$s edited an %8$s.', 'ProfileHeadline' => '%1$s edited an %8$s.', 'RouteCode' => 'addon', 'Public' => '1'));
-
-// People's comments on addons
-$SQL->Replace('ActivityType', array('AllowComments' => '0', 'FullHeadline' => '%1$s asked a %8$s about %4$s addon.', 'ProfileHeadline' => '%1$s asked a %8$s about %4$s addon.', 'RouteCode' => 'question', 'Notify' => '1', 'Public' => '0'), array('Name' => 'AddonComment'), TRUE);
-
-// People adding new language definitions
-if ($SQL->GetWhere('ActivityType', array('Name' => 'AddUserLanguage'))->NumRows() == 0)
-   $SQL->Insert('ActivityType', array('AllowComments' => '0', 'Name' => 'AddUserLanguage', 'FullHeadline' => '%1$s added a new %8$s.', 'ProfileHeadline' => '%1$s added a new %8$s.', 'RouteCode' => 'language', 'Notify' => '0', 'Public' => '1'));
-
-// People editing language definitions
-if ($SQL->GetWhere('ActivityType', array('Name' => 'EditUserLanguage'))->NumRows() == 0)
-   $SQL->Insert('ActivityType', array('AllowComments' => '0', 'Name' => 'EditUserLanguage', 'FullHeadline' => '%1$s edited a %8$s.', 'ProfileHeadline' => '%1$s edited a %8$s.', 'RouteCode' => 'language', 'Notify' => '0', 'Public' => '1'));
+$ActivityModel = new ActivityModel();
+$ActivityModel->DefineType('Addon');
 
 // Contains list of available languages for translating
 $Construct->Table('Language')
