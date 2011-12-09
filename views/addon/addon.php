@@ -84,7 +84,7 @@ if ($this->DeliveryType() == DELIVERY_TYPE_ALL) {
 			</div>
 			<div class="Box RequirementBox">
             <h3><?php echo T('Requirements'); ?></h3>
-            <div itemprop="requiredFeatures">
+            <div>
 				<dl>
 					<dt>Vanilla</dt>
 					<dd><span class="Vanilla<?php echo $VanillaVersion; ?>">Vanilla <?php echo $VanillaVersion; ?></span></dd>
