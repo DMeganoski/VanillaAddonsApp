@@ -2,6 +2,10 @@
 $Session = Gdn::Session();
 $VanillaVersion = $this->Data('Vanilla2') == '1' ? '2' : '1';
 
+?><div itemscope itemtype="http://schema.org/SoftwareApplication"><?php
+
+echo '<link itemprop="url" href="'.htmlspecialchars(Gdn::Controller()->CanonicalUrl()).'" />';
+
 if ($this->DeliveryType() == DELIVERY_TYPE_ALL) {
 	// echo $this->FetchView('head');
 	?>
@@ -13,11 +17,11 @@ if ($this->DeliveryType() == DELIVERY_TYPE_ALL) {
 			<span>&rarr;</span> <?php
             $TypesPlural = array_flip($this->Data('_TypesPlural'));
             $TypePlural = GetValue($this->Data('AddonTypeID'), $TypesPlural, 'all');
-            echo Anchor(T($TypePlural), '/addon/browse/'.strtolower($TypePlural));
+            echo Anchor(T($TypePlural), '/addon/browse/'.strtolower($TypePlural), '', array('itemprop' => 'softwareApplicationCategory'));
          ?>
 		</div>
-		<?php echo $this->Data('Name'); ?>
-		<?php echo $this->Data('Version'); ?>
+		<span itemprop="name"><?php echo $this->Data('Name'); ?></span>
+		<span itemprop="softwareVersion"><?php echo $this->Data('Version'); ?></span>
 	</h1>
 	<?php
    $AddonID = $this->Data('AddonID');
@@ -49,7 +53,7 @@ if ($this->DeliveryType() == DELIVERY_TYPE_ALL) {
 	<div class="Legal">
 		<div class="DownloadPanel">
 			<div class="Box DownloadBox">
-				<p><?php echo Anchor('Download Now', '/get/'.($this->Data('Slug') ? urlencode($this->Data('Slug')) : $AddonID), 'Button BigButton'); ?></p>
+				<p><?php echo Anchor('Download Now', '/get/'.($this->Data('Slug') ? urlencode($this->Data('Slug')) : $AddonID), 'Button BigButton', array('itemprop' => 'downloadURL')); ?></p>
 				<dl>
 					<dt>Author</dt>
 					<dd><?php echo Anchor($this->Data('InsertName'), '/profile/'.urlencode($this->Data('InsertName'))); ?></dd>
@@ -65,12 +69,12 @@ if ($this->DeliveryType() == DELIVERY_TYPE_ALL) {
                   
                ?></dd>
 					<dt>Released</dt>
-					<dd><?php echo Gdn_Format::Date($this->Data('DateUploaded')); ?></dd>
+					<dd itemprop="datePublished"><?php echo Gdn_Format::Date($this->Data('DateUploaded'), 'html'); ?></dd>
 					<dt>Downloads</dt>
-					<dd><?php echo number_format($this->Data('CountDownloads')); ?></dd>
+					<dd><meta itemprop="interactionCount" content=”UserDownloads:<?php echo $this->Data('CountDownloads'); ?>" /><?php echo number_format($this->Data('CountDownloads')); ?></dd>
                <?php
                if ($this->Data('FileSize'))
-                  echo '<dt>File Size</dt><dd>'.Gdn_Upload::FormatFileSize($this->Data('FileSize')).'</dd>';
+                  echo '<dt>File Size</dt><dd>'.'<meta itemprop="fileSize" content="'.$this->Data('FileSize').'"/>'.Gdn_Upload::FormatFileSize($this->Data('FileSize')).'</dd>';
                if (Gdn::Session()->CheckPermission('Addons.Addon.Manage')) {
                   echo '<dt>Checked</dt><dd>'.($this->Data('Checked') ? 'Yes' : 'No').'</dd>';
                }
@@ -80,6 +84,7 @@ if ($this->DeliveryType() == DELIVERY_TYPE_ALL) {
 			</div>
 			<div class="Box RequirementBox">
             <h3><?php echo T('Requirements'); ?></h3>
+            <div itemprop="requiredFeatures">
 				<dl>
 					<dt>Vanilla</dt>
 					<dd><span class="Vanilla<?php echo $VanillaVersion; ?>">Vanilla <?php echo $VanillaVersion; ?></span></dd>
@@ -112,6 +117,7 @@ if ($this->DeliveryType() == DELIVERY_TYPE_ALL) {
                }
             }
 				?>
+            </div>
 			</div>
          <?php 
          $Versions = (array)$this->Data('Versions');
@@ -162,18 +168,23 @@ if ($this->DeliveryType() == DELIVERY_TYPE_ALL) {
    }
 
 	if ($this->Data('Icon') != '') {
-		echo '<img class="Icon" src="'.Gdn_Upload::Url($this->Data('Icon')).'" />';
+		echo '<img class="Icon" src="'.Gdn_Upload::Url($this->Data('Icon')).'" itemprop="image" />';
    }
 
    $CurrentVersion = $this->Data('CurrentVersion');
    if ($CurrentVersion && $CurrentVersion != $this->Data('Version')) {
       echo '<p>', sprintf(T("This is not the most recent version of this plugin.", 'This is not the most recent version of this plugin. For the most recent version click <a href="%s">here</a>.'), URL('addon/'.AddonModel::Slug($this->Data, FALSE))), '</p>';
    }
-		
+   
+   echo '<div itemprop="description">';
+   
 	echo Gdn_Format::Html($this->Data('Description'));
    if ($this->Data('Description2') && $Ver != 'v1') {
       echo '<br /><br />', Gdn_Format::Html($this->Data('Description2'));
    }
+   
+   echo '</div>';
+   
 	?>
 	</div>
 	<?php
@@ -183,7 +194,7 @@ if ($this->DeliveryType() == DELIVERY_TYPE_ALL) {
 			<?php
 			foreach ($this->PictureData->Result() as $Picture) {
             echo '<span class="AddonPicture">';
-				echo '<a rel="popable[gallery]" href="#Pic_'.$Picture->AddonPictureID.'"><img src="'.Gdn_Upload::Url(ChangeBasename($Picture->File, 'at%s')).'" /></a>';
+				echo '<a rel="popable[gallery]" href="#Pic_'.$Picture->AddonPictureID.'"><img src="'.Gdn_Upload::Url(ChangeBasename($Picture->File, 'at%s')).'" itemprop="screenshot" /></a>';
 
             if ($Session->CheckPermission('Addon.Addons.Manage')) {
                echo '<a class="Popup DeletePicture" href="'.Url('/addon/deletepicture/'.$Picture->AddonPictureID).'">x</a>';
@@ -214,3 +225,5 @@ if ($this->DeliveryType() == DELIVERY_TYPE_ALL) {
 		<?php
 	}
 }
+?>
+</div>

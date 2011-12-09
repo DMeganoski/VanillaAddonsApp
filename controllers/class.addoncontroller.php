@@ -41,7 +41,7 @@ class AddonController extends AddonsController {
       if ($ID != '') {
          $Addon = $this->AddonModel->GetSlug($ID, TRUE);
          if (!is_array($Addon)) {
-            $this->View = 'NotFound';
+            throw NotFoundException('Addon');
          } else {
             $AddonID = $Addon['AddonID'];
             $this->SetData($Addon);
