@@ -56,7 +56,7 @@ if ($this->DeliveryType() == DELIVERY_TYPE_ALL) {
 				<p><?php echo Anchor('Download Now', '/get/'.($this->Data('Slug') ? urlencode($this->Data('Slug')) : $AddonID), 'Button BigButton', array('itemprop' => 'downloadURL')); ?></p>
 				<dl>
 					<dt>Author</dt>
-					<dd><?php echo Anchor($this->Data('InsertName'), '/profile/'.urlencode($this->Data('InsertName'))); ?></dd>
+					<dd><?php echo UserAnchor($this->Data, NULL, array('Px' => 'Insert', 'Rel' => 'author')); ?></dd>
 					<dt>Version</dt>
 					<dd><?php
                   echo $this->Data('Version');
